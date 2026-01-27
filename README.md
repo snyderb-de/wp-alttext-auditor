@@ -7,6 +7,7 @@ A comprehensive WordPress plugin for managing and auditing alt-text across your 
 ## Features
 
 ### Quick Edit (Media Library)
+
 - **Integrated Media Library Column**: Adds an "Alt Text" column to the existing WordPress Media Library
 - **Inline Editing**: Edit alt-text directly in the media library table without leaving the page
 - **Auto-Save Functionality**: Alt-text changes are automatically saved as you type (with 1-second delay)
@@ -14,6 +15,7 @@ A comprehensive WordPress plugin for managing and auditing alt-text across your 
 - **Image Detection**: Only shows alt-text fields for actual image files
 
 ### Alt Text Manager Page
+
 - **Dedicated Interface**: Browse all media library images with thumbnails
 - **Live Search**: Real-time filtering as you type - searches both filenames and alt-text
 - **Advanced Filters**: Filter by alt-text status (All, Has Alt-Text, Missing Alt-Text)
@@ -23,6 +25,7 @@ A comprehensive WordPress plugin for managing and auditing alt-text across your 
 - **Quick Access**: Direct links to view or edit images
 
 ### Alt-Text Audit Dashboard (NEW)
+
 - **Site-Wide Scanning**: Scans all published posts, pages, and media library for missing alt-text
 - **Real-time Progress**: Animated progress bar during scans with batch processing
 - **Statistics Dashboard**: Beautiful cards showing total images, missing alt-text counts, and percentages
@@ -42,6 +45,7 @@ A comprehensive WordPress plugin for managing and auditing alt-text across your 
 - **24-Hour Caching**: Statistics cached for performance with manual refresh option
 
 ### General Features
+
 - **Responsive Design**: Works on desktop, tablet, and mobile devices
 - **AJAX-Powered**: Smooth user experience without page refreshes
 - **Tooltips & Help**: Contextual help on buttons and complex features
@@ -63,29 +67,35 @@ A comprehensive WordPress plugin for managing and auditing alt-text across your 
 2. Click **"Scan Published Content"** to scan all posts and pages for images
 3. Click **"Scan Media Library"** to scan all uploaded images
 4. View the results:
+
    - **Overview Tab**: See statistics cards with total images, missing alt-text counts, and percentages
    - **Missing Alt-Text Tab**: Browse all images missing alt-text with thumbnails and links to fix them
    - **By User Tab**: See which team members have the most missing alt-text (great for training!)
+
 5. Use the filter form to narrow down results:
    - Filter by specific user to see their missing alt-text
    - Filter by content source (Post Content or Media Library)
    - Filter by post type (post, page, custom post types)
    - Search by image filename
    - Click "Reset Filters" to clear all filters
+
 6. Fix missing alt-text quickly:
    - Click "Add Alt Text" button next to any missing image
    - Enter alt-text in the inline editor
    - Click "Save" to update - the row will be removed and statistics updated
+
 7. Export results:
    - Click "Export to CSV" to download all filtered results
    - CSV includes: Image Source, Found In, Post Type, Content Type, User, Scan Date
    - Opens in Excel with UTF-8 encoding support
    - Formula injection protection included
+
 8. Enable automatic scanning (optional):
    - Check "Enable automatic daily scanning" on the Overview tab
    - Scans run automatically once per day via WordPress cron
    - View next scheduled scan time below the checkbox
    - Disable anytime by unchecking the box
+
 9. Statistics are cached for 24 hours - use **"Refresh Statistics"** to update immediately
 
 ### Quick Edit in Media Library
@@ -96,14 +106,17 @@ A comprehensive WordPress plugin for managing and auditing alt-text across your 
 4. Type your desired alt-text - changes save automatically after you stop typing
 5. Visual indicators show when content is being saved, successfully saved, or if there's an error
 
-### Alt Text Manager Page
+### Dedicated Alt Text Manager
 
 1. Go to **Media > Alt Text Manager** in your WordPress admin
 2. View all your media library images with thumbnails
 3. Use the filters to find specific images:
+
+
    - Select "Missing Alt-Text" to see only images that need attention
    - Type in the search box to filter by filename or existing alt-text (live search)
    - Sort by clicking column headers (filename, status)
+
 4. Edit alt-text inline with auto-save
 5. Status column shows at a glance which images need attention (green checkmark or red warning)
 
@@ -134,6 +147,8 @@ wp-alttext-auditor/
 ### Database Schema
 
 The plugin creates a custom table `wp_alttext_audit_results` to store scan results:
+
+
 - Tracks images from both post content and media library
 - Stores user attribution (post author/uploader)
 - Indexes for fast querying by user, content type, and alt-text status
@@ -216,7 +231,7 @@ For support, please create an issue in the plugin repository or contact the plug
 
 ### 1.0.5 (Bug Fix: Report Generation)
 
-**Fixed Report Generation Issue**
+#### Fixed Report Generation Issue
 
 - **FIXED:** Manual scans now generate HTML reports (previously only cron scans generated reports)
 - Reports now generate after every scan type (manual, cron, and on-demand)
@@ -225,11 +240,12 @@ For support, please create an issue in the plugin repository or contact the plug
 
 ### 1.0.4 (HTML Report Generation)
 
-**HTML Report Feature**
+#### HTML Report Feature
 
 Added comprehensive HTML report generation for each scan with beautiful, print-ready formatting:
 
-**Report Features:**
+#### Report Features
+
 - Automatically generated after each scan (manual or automatic)
 - "Generate Report Now" button for on-demand creation in dashboard
 - Beautiful gradient statistics cards showing totals, missing, and compliance
@@ -239,14 +255,16 @@ Added comprehensive HTML report generation for each scan with beautiful, print-r
 - Mobile-responsive design with print styles
 - Saved to `uploads/alttext-reports/` directory
 
-**Dashboard Integration:**
+#### Dashboard Integration
+
 - Recent reports list (last 10) displayed in Overview tab
 - Direct links to view/download reports
 - Automatic cleanup keeps last 20 reports
 - AJAX-powered on-demand generation
 - Status messages with success/error feedback
 
-**Technical Implementation:**
+#### Technical Implementation
+
 - New `WP_AltText_HTML_Report` class in `includes/class-html-report.php`
 - Reports stored in uploads with .htaccess protection
 - Report metadata stored in WordPress options
@@ -255,29 +273,33 @@ Added comprehensive HTML report generation for each scan with beautiful, print-r
 
 ### 1.0.3 (Documentation & Polish)
 
-**Documentation & WordPress.org Readiness**
+#### Documentation & WordPress.org Readiness
 
 Enhanced documentation and polish for production deployment and WordPress.org submission:
 
-**Documentation Improvements:**
+#### Documentation Improvements
+
 - Added comprehensive JSDoc comments to all JavaScript files (admin.js, audit-dashboard.js)
 - Enhanced PHPDoc comments throughout PHP codebase
 - All functions now have complete parameter and return type documentation
 - Added detailed file-level documentation blocks
 
-**WordPress.org Compatibility:**
+#### WordPress.org Compatibility
+
 - Created readme.txt following WordPress.org plugin directory standards
 - Includes complete plugin metadata, changelog, upgrade notices
 - Added FAQ section with common questions
 - Includes detailed feature descriptions and compatibility information
 
-**Contextual Help:**
+#### Contextual Help
+
 - Added WordPress contextual help tabs to audit dashboard
 - 4 comprehensive help tabs: Overview, Scanning, Filtering & Export, Quick Edit
 - Help sidebar with links to W3C and WCAG resources
 - Accessible via "Help" dropdown in WordPress admin
 
-**Code Quality:**
+#### Code Quality
+
 - WordPress coding standards compliance verified
 - Removed unnecessary debug code
 - Final security review completed
@@ -285,11 +307,12 @@ Enhanced documentation and polish for production deployment and WordPress.org su
 
 ### 1.0.2 (Performance Optimization)
 
-**Performance Enhancements - Phase 19 Optimizations**
+#### Performance Enhancements - Phase 19 Optimizations
 
 Comprehensive performance improvements across database, caching, and asset loading:
 
-**Database Optimizations:**
+#### Database Optimizations
+
 - Added composite indexes for common query patterns:
   - `has_alt_scan_date` - Optimizes "missing alt-text ordered by date" queries
   - `has_alt_user_id` - Optimizes filtering by user and alt-text status
@@ -297,18 +320,21 @@ Comprehensive performance improvements across database, caching, and asset loadi
 - Eliminated N+1 query problem in user attribution with batch fetching
 - Single query now retrieves all user data instead of individual lookups per user
 
-**Caching Improvements:**
+#### Caching Improvements
+
 - Added 1-hour transient cache for user attribution results
 - Automatic cache invalidation when audit data changes
 - Multi-level caching strategy reduces database load
 
-**Asset Loading Optimization:**
+#### Asset Loading Optimization
+
 - Separated asset loading by page to reduce payload
 - Admin JS/CSS only loads on media library and manager pages
 - Audit dashboard JS/CSS only loads on audit page
 - Proper script localization based on current page context
 
-**Impact:**
+#### Impact
+
 - Reduces database queries by ~50-90% on user attribution page
 - Faster page load times with conditional asset loading
 - Improved query performance with optimized indexes
@@ -316,22 +342,25 @@ Comprehensive performance improvements across database, caching, and asset loadi
 
 ### 1.0.1 (Security Update)
 
-**Security Hardening - Critical and High Severity Fixes**
+#### Security Hardening - Critical and High Severity Fixes
 
 Fixed all critical and high-severity security vulnerabilities identified in security audit:
 
-**Critical Fixes:**
+#### Critical Fixes
+
 - Fixed SQL injection vulnerability in table name queries (added $wpdb->prepare() and validation)
 - Fixed unsafe direct object reference in export filters (added whitelist validation)
 
-**High Priority Fixes:**
+#### High Priority Fixes
+
 - Fixed unescaped output in dashboard (added esc_url(), wp_kses_post())
 - Improved GET-based export security (added rate limiting and referrer checking)
 - Standardized AJAX nonce verification (using check_ajax_referer() consistently)
 - Added input validation to storage filters (whitelist validation for content_type and post_type)
 - Fixed unescaped thumbnail output (using wp_kses_post())
 
-**Security Enhancements:**
+#### Security Enhancements
+
 - Rate limiting on CSV exports (1 per minute per user)
 - Referrer validation to prevent external access to exports
 - Table name format validation (alphanumeric and underscore only)
@@ -342,14 +371,16 @@ See SECURITY-AUDIT.md for complete security audit report.
 
 ### 1.0.0
 
-**Initial Release - Comprehensive Alt-Text Management Suite**
+#### Initial Release - Comprehensive Alt-Text Management Suite
 
-**Core Features:**
+#### Core Features
+
 - Integrated alt-text editing directly into WordPress Media Library with inline auto-save
 - Alt Text Manager page for browsing media library with thumbnails
 - Real-time visual feedback (loading, success, error indicators)
 
-**Audit Dashboard (Major Feature):**
+#### Audit Dashboard (Major Feature)
+
 - Site-wide scanning engine for posts, pages, and media library
 - Chunked batch processing (50 items per batch) prevents timeouts on large sites
 - Real-time progress bar with animated shimmer effect
@@ -362,7 +393,8 @@ See SECURITY-AUDIT.md for complete security audit report.
 - Automatic daily scanning: optional WP Cron background processing with enable/disable toggle
 - 24-hour statistics caching for performance
 
-**Technical Implementation:**
+#### Technical Implementation
+
 - Custom database table for audit results with proper indexes
 - 4 new PHP classes: Audit Scanner, Storage, Dashboard, User Attribution
 - DOMDocument HTML parsing for robust image extraction
@@ -375,13 +407,15 @@ See SECURITY-AUDIT.md for complete security audit report.
 - Prepared statements for SQL injection prevention
 - XSS prevention with comprehensive escaping
 
-**Performance:**
+#### Performance
+
 - Bulk database inserts
 - Transient caching
 - Lazy loading for dashboard tabs
 - Debounced auto-save
 
-**Security:**
+#### Security
+
 - Multiple nonces for different actions (check_ajax_referer for consistency)
 - Capability checks (upload_files, manage_options)
 - Input sanitization and output escaping throughout (wp_kses_post, esc_url, esc_html)
