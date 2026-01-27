@@ -1,0 +1,395 @@
+/* Alt Text Updater - Media Library Integration Styles */
+
+/* Alt Text Manager Page Layout */
+.toplevel_page_wp-alttext-manager .wrap > h1 {
+    margin-bottom: 8px;
+}
+
+.toplevel_page_wp-alttext-manager .wrap > .description {
+    font-size: 14px;
+    color: #646970;
+}
+
+.toplevel_page_wp-alttext-manager .wp-list-table {
+    margin-top: 0;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+/* Alt Text Column in Media Library */
+.wp-list-table .column-alt_text {
+    width: 300px;
+}
+
+/* Alt Text Input Wrapper */
+.alttext-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    max-width: 280px;
+}
+
+/* Alt Text Input Field */
+.alttext-input {
+    width: 100%;
+    padding: 6px 30px 6px 8px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    font-size: 13px;
+    line-height: 1.4;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    background: #fff;
+}
+
+.alttext-input:focus {
+    border-color: #007cba;
+    box-shadow: 0 0 0 1px #007cba;
+    outline: none;
+}
+
+.alttext-input.saving {
+    border-color: #f0b849;
+    background: #fffbf0;
+}
+
+.alttext-input.success {
+    border-color: #46b450;
+    background: #f0fff4;
+}
+
+.alttext-input.error {
+    border-color: #dc3232;
+    background: #fff0f0;
+}
+
+/* Save Indicators */
+.alttext-save-indicator {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+}
+
+.alttext-save-indicator .spinner {
+    float: none;
+    margin: 0;
+    display: none;
+    width: 16px;
+    height: 16px;
+    background-size: 16px 16px;
+}
+
+.alttext-save-indicator .spinner.is-active {
+    display: block;
+}
+
+.alttext-save-indicator .success-icon,
+.alttext-save-indicator .error-icon {
+    display: none;
+    font-size: 14px;
+    width: 16px;
+    height: 16px;
+}
+
+.alttext-save-indicator .success-icon {
+    color: #46b450;
+}
+
+.alttext-save-indicator .error-icon {
+    color: #dc3232;
+}
+
+.alttext-save-indicator .success-icon.show,
+.alttext-save-indicator .error-icon.show {
+    display: block;
+    animation: fadeInOut 2s ease-in-out;
+}
+
+/* Not an image indicator */
+.alttext-not-image {
+    font-style: italic;
+    color: #666;
+    font-size: 12px;
+}
+
+/* Character limit warning */
+.alttext-input.near-limit {
+    border-color: #f0b849;
+    background: #fffbf0;
+}
+
+/* Animations */
+@keyframes fadeInOut {
+    0%, 100% {
+        opacity: 0;
+    }
+    15%, 85% {
+        opacity: 1;
+    }
+}
+
+/* Responsive adjustments for media library */
+@media screen and (max-width: 1200px) {
+    .wp-list-table .column-alt_text {
+        width: 250px;
+    }
+    
+    .alttext-input-wrapper {
+        max-width: 230px;
+    }
+}
+
+@media screen and (max-width: 960px) {
+    .wp-list-table .column-alt_text {
+        width: 200px;
+    }
+    
+    .alttext-input-wrapper {
+        max-width: 180px;
+    }
+    
+    .alttext-input {
+        font-size: 12px;
+        padding: 5px 25px 5px 6px;
+    }
+}
+
+@media screen and (max-width: 782px) {
+    /* WordPress responsive breakpoint */
+    .wp-list-table .column-alt_text {
+        display: none;
+    }
+}
+
+/* Ensure proper spacing in media library table */
+.wp-list-table td.column-alt_text {
+    vertical-align: top;
+    padding-top: 12px;
+}
+
+/* Loading state for entire row */
+.alttext-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Tooltip for error messages */
+.alttext-input[title] {
+    cursor: help;
+}
+
+/* Focus styles for accessibility */
+.alttext-input:focus-visible {
+    outline: 2px solid #007cba;
+    outline-offset: 1px;
+}
+
+/* Alt Text Manager Admin Page Styles */
+.alttext-stats {
+    margin: 0 0 15px 0;
+    padding: 12px 15px;
+    background: #f6f7f7;
+    border-left: 4px solid #2271b1;
+    border-radius: 0 2px 2px 0;
+}
+
+.alttext-stats p {
+    margin: 0;
+    font-size: 13px;
+    color: #50575e;
+    font-weight: 500;
+}
+
+.column-thumbnail {
+    width: 100px;
+}
+
+.column-filename {
+    width: 30%;
+}
+
+.column-alttext {
+    width: 40%;
+}
+
+.column-status {
+    width: 150px;
+}
+
+.alttext-thumbnail {
+    max-width: 80px;
+    max-height: 80px;
+    border-radius: 3px;
+    border: 1px solid #ddd;
+}
+
+.alttext-no-thumbnail {
+    width: 80px;
+    height: 80px;
+    background: #f0f0f1;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.alttext-no-thumbnail .dashicons {
+    font-size: 32px;
+    color: #a7aaad;
+}
+
+.alttext-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-size: 13px;
+}
+
+.alttext-status.has-alt {
+    background: #f0fff4;
+    color: #46b450;
+}
+
+.alttext-status.no-alt {
+    background: #fff0f0;
+    color: #dc3232;
+}
+
+.alttext-status .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* Alt Text Manager Filter Form */
+.alttext-manager-filters {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 20px;
+    margin: 20px 0 25px 0;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+.alttext-filter-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.alttext-filter-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.alttext-filter-item label {
+    font-weight: 600;
+    font-size: 13px;
+    color: #1d2327;
+    margin: 0;
+}
+
+.alttext-filter-item select,
+.alttext-filter-item input[type="search"] {
+    min-width: 180px;
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid #8c8f94;
+    border-radius: 3px;
+    font-size: 13px;
+}
+
+.alttext-search-item {
+    flex: 1;
+    min-width: 250px;
+}
+
+.alttext-search-item input[type="search"] {
+    width: 100%;
+}
+
+.alttext-filter-item .button {
+    height: 32px;
+    line-height: 30px;
+    padding: 0 16px;
+    margin: 0 4px 0 0;
+}
+
+.alttext-filter-item .button:last-child {
+    margin-right: 0;
+}
+
+/* Sortable Table Headers */
+.wp-list-table thead th.sortable a,
+.wp-list-table thead th.sorted a {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    text-decoration: none;
+    color: inherit;
+    padding: 0;
+}
+
+.wp-list-table thead th.sortable a:hover,
+.wp-list-table thead th.sortable a:focus {
+    color: #2271b1;
+}
+
+.wp-list-table thead th.sortable .sorting-indicator {
+    width: 10px;
+    height: 10px;
+    position: relative;
+}
+
+.wp-list-table thead th.sortable .sorting-indicator::before {
+    content: "\f142";
+    font-family: dashicons;
+    font-size: 16px;
+    color: #a7aaad;
+    position: absolute;
+    top: -3px;
+    left: 0;
+}
+
+.wp-list-table thead th.sorted.asc .sorting-indicator::before {
+    content: "\f142";
+    color: #2271b1;
+}
+
+.wp-list-table thead th.sorted.desc .sorting-indicator::before {
+    content: "\f140";
+    color: #2271b1;
+}
+
+/* Responsive styles for filters */
+@media screen and (max-width: 782px) {
+    .alttext-filter-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .alttext-filter-item,
+    .alttext-search-item {
+        width: 100%;
+        min-width: unset;
+    }
+
+    .alttext-filter-item select,
+    .alttext-filter-item input[type="search"] {
+        min-width: unset;
+        width: 100%;
+    }
+
+    .alttext-filter-item .button {
+        width: 100%;
+    }
+}

@@ -1,0 +1,89 @@
+# Claude Code
+.claude/
+.claude-code/
+*.claude-session
+
+# WordPress
+wp-config.php
+wp-content/uploads/
+wp-content/cache/
+wp-content/backup-db/
+wp-content/backups/
+wp-content/blogs.dir/
+wp-content/upgrade/
+.htaccess
+sitemap.xml
+sitemap.xml.gz
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# IDE & Editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+.project
+.settings/
+.buildpath
+nbproject/
+
+# Node (if used for build tools)
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Composer (if used)
+vendor/
+composer.lock
+
+# Build artifacts
+*.zip
+*.tar.gz
+*.rar
+dist/
+build/
+
+# Logs
+*.log
+error_log
+debug.log
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Testing
+tests/_output/*
+tests/_support/_generated
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.cache

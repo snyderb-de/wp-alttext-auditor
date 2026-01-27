@@ -1,0 +1,903 @@
+/**
+ * WP Alt Text Updater - Audit Dashboard JavaScript
+ *
+ * Handles AJAX interactions for the audit dashboard including:
+ * - Chunked batch scanning of posts and media library
+ * - Real-time progress tracking with animated progress bars
+ * - Statistics loading and caching
+ * - User attribution display
+ * - Quick-edit functionality for inline alt-text updates
+ * - CSV export with filter support
+ * - Automatic daily scanning toggle
+ *
+ * @package WP_AltText_Updater
+ * @since 1.0.0
+ */
+
+jQuery(document).ready(function($) {
+    'use strict';
+
+    /**
+     * Scanning state flag to prevent concurrent scans
+     * @type {boolean}
+     */
+    let isScanning = false;
+
+    /**
+     * Current scan type ('content' or 'media')
+     * @type {string|null}
+     */
+    let currentScanType = null;
+
+    /**
+     * Initialize dashboard on page load
+     * Loads statistics, user attribution, and binds all event handlers
+     */
+    function initDashboard() {
+        // Load statistics if on overview tab
+        if ($('#audit-stats-cards').length > 0) {
+            loadStatistics();
+        }
+
+        // Load user attribution if on users tab
+        if ($('#audit-user-results').length > 0 && $('.audit-users-tab').length > 0) {
+            loadUserAttribution();
+        }
+
+        // Bind event handlers
+        bindScanButtons();
+        bindClearCacheButton();
+        bindQuickEditButtons();
+        bindExportButton();
+        bindCronToggle();
+        bindReportButton();
+    }
+
+    /**
+     * Bind scan button click handlers
+     * Sets up event listeners for content and media library scan buttons
+     */
+    function bindScanButtons() {
+        $('#scan-content-btn').on('click', function() {
+            startScan('content');
+        });
+
+        $('#scan-drafts-btn').on('click', function() {
+            startScan('drafts');
+        });
+
+        $('#scan-media-btn').on('click', function() {
+            startScan('media');
+        });
+    }
+
+    /**
+     * Bind clear cache button handler
+     */
+    function bindClearCacheButton() {
+        $('#clear-cache-btn').on('click', function() {
+            clearCache();
+        });
+    }
+
+    /**
+     * Bind quick-edit button handlers with event delegation
+     * Handles show/hide edit mode and save/cancel actions for inline editing
+     */
+    function bindQuickEditButtons() {
+        // Use event delegation for dynamically loaded content
+        $(document).on('click', '.audit-quick-edit-trigger', function() {
+            var $row = $(this).closest('td');
+            $row.find('.audit-alt-text-display').hide();
+            $row.find('.audit-alt-text-edit').show();
+            $row.find('.audit-quick-edit-input').focus();
+        });
+
+        $(document).on('click', '.audit-cancel-quick-edit', function() {
+            var $row = $(this).closest('td');
+            $row.find('.audit-alt-text-edit').hide();
+            $row.find('.audit-alt-text-display').show();
+            $row.find('.audit-quick-edit-input').val('');
+        });
+
+        $(document).on('click', '.audit-save-quick-edit', function() {
+            var $row = $(this).closest('td');
+            var $display = $row.find('.audit-alt-text-display');
+            var $edit = $row.find('.audit-alt-text-edit');
+            var attachmentId = $display.data('attachment-id');
+            var resultId = $display.data('result-id');
+            var altText = $row.find('.audit-quick-edit-input').val().trim();
+
+            if (!altText) {
+                alert('Please enter alt text.');
+                return;
+            }
+
+            saveQuickEdit(attachmentId, resultId, altText, $row);
+        });
+    }
+
+    /**
+     * Save quick-edit alt text via two-step AJAX process
+     * First updates WordPress attachment meta, then syncs audit database
+     *
+     * @param {number} attachmentId - WordPress attachment ID
+     * @param {number} resultId - Audit database result ID
+     * @param {string} altText - New alt-text value
+     * @param {jQuery} $row - jQuery object of the table row
+     */
+    function saveQuickEdit(attachmentId, resultId, altText, $row) {
+        var $edit = $row.find('.audit-alt-text-edit');
+        var $spinner = $edit.find('.spinner');
+        var $saveBtn = $edit.find('.audit-save-quick-edit');
+        var $cancelBtn = $edit.find('.audit-cancel-quick-edit');
+
+        // Disable buttons and show spinner
+        $saveBtn.prop('disabled', true);
+        $cancelBtn.prop('disabled', true);
+        $spinner.addClass('is-active');
+
+        $.ajax({
+            url: wpAltTextUpdater.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'update_alt_text',
+                nonce: wpAltTextUpdater.nonce,
+                attachment_id: attachmentId,
+                alt_text: altText
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Update the audit record
+                    updateAuditRecord(resultId, altText, function(success) {
+                        $spinner.removeClass('is-active');
+                        $saveBtn.prop('disabled', false);
+                        $cancelBtn.prop('disabled', false);
+
+                        if (success) {
+                            // Remove the row from the table (no longer missing)
+                            $row.closest('tr').fadeOut(400, function() {
+                                $(this).remove();
+
+                                // Show message
+                                showSuccess('Alt text updated successfully! Refreshing...');
+
+                                // Reload page after 1 second to update counts
+                                setTimeout(function() {
+                                    window.location.reload();
+                                }, 1000);
+                            });
+                        } else {
+                            showError('Alt text saved but failed to update audit record.');
+                            $edit.hide();
+                            $row.find('.audit-alt-text-display').show();
+                        }
+                    });
+                } else {
+                    $spinner.removeClass('is-active');
+                    $saveBtn.prop('disabled', false);
+                    $cancelBtn.prop('disabled', false);
+                    showError('Failed to update alt text: ' + (response.data ? response.data.message : 'Unknown error'));
+                }
+            },
+            error: function() {
+                $spinner.removeClass('is-active');
+                $saveBtn.prop('disabled', false);
+                $cancelBtn.prop('disabled', false);
+                showError('Network error while updating alt text.');
+            }
+        });
+    }
+
+    /**
+     * Update audit database record after alt-text is saved
+     * Syncs audit database with WordPress attachment meta
+     *
+     * @param {number} resultId - Audit database result ID
+     * @param {string} altText - New alt-text value
+     * @param {Function} callback - Callback function receiving success boolean
+     */
+    function updateAuditRecord(resultId, altText, callback) {
+        $.ajax({
+            url: wpAltTextUpdater.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'alttext_update_audit_record',
+                nonce: wpAltTextUpdater.audit_nonce,
+                result_id: resultId,
+                alt_text: altText
+            },
+            success: function(response) {
+                callback(response.success);
+            },
+            error: function() {
+                callback(false);
+            }
+        });
+    }
+
+    /**
+     * Bind export CSV button handler
+     */
+    function bindExportButton() {
+        $(document).on('click', '#export-csv-btn', function(e) {
+            e.preventDefault();
+
+            // Get current filter parameters from URL
+            var urlParams = new URLSearchParams(window.location.search);
+            var filters = {
+                filter_user: urlParams.get('filter_user') || '',
+                filter_content_type: urlParams.get('filter_content_type') || '',
+                filter_post_type: urlParams.get('filter_post_type') || '',
+                filter_search: urlParams.get('filter_search') || ''
+            };
+
+            // Build export URL with filters
+            var exportUrl = wpAltTextUpdater.ajax_url +
+                '?action=alttext_audit_export' +
+                '&nonce=' + wpAltTextUpdater.audit_nonce +
+                '&filter_user=' + encodeURIComponent(filters.filter_user) +
+                '&filter_content_type=' + encodeURIComponent(filters.filter_content_type) +
+                '&filter_post_type=' + encodeURIComponent(filters.filter_post_type) +
+                '&filter_search=' + encodeURIComponent(filters.filter_search);
+
+            // Trigger download by opening URL in new window
+            window.location.href = exportUrl;
+        });
+    }
+
+    /**
+     * Bind cron toggle checkbox handler
+     */
+    function bindCronToggle() {
+        $('#cron-enabled-checkbox').on('change', function() {
+            var enabled = $(this).is(':checked');
+            var $statusMessage = $('#cron-status-message');
+
+            $.ajax({
+                url: wpAltTextUpdater.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'alttext_toggle_cron',
+                    nonce: wpAltTextUpdater.audit_nonce,
+                    enabled: enabled ? 'true' : 'false'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $statusMessage.removeClass('error').addClass('success');
+                        $statusMessage.text(response.data.message).show();
+
+                        // Reload page after 2 seconds to show updated schedule
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 2000);
+                    } else {
+                        $statusMessage.removeClass('success').addClass('error');
+                        $statusMessage.text(response.data.message || 'Error toggling automatic scanning').show();
+                        // Revert checkbox state
+                        $('#cron-enabled-checkbox').prop('checked', !enabled);
+                    }
+                },
+                error: function() {
+                    $statusMessage.removeClass('success').addClass('error');
+                    $statusMessage.text('Network error while toggling automatic scanning').show();
+                    // Revert checkbox state
+                    $('#cron-enabled-checkbox').prop('checked', !enabled);
+                }
+            });
+        });
+    }
+
+    /**
+     * Bind report generation button handler
+     * Generates HTML report on demand via AJAX
+     */
+    function bindReportButton() {
+        $('#generate-report-btn').on('click', function() {
+            var $btn = $(this);
+            var $statusMessage = $('#report-status-message');
+            var originalText = $btn.text();
+
+            // Disable button and show loading
+            $btn.prop('disabled', true).text('Generating Report...');
+            $statusMessage.hide();
+
+            $.ajax({
+                url: wpAltTextUpdater.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'alttext_generate_report',
+                    nonce: wpAltTextUpdater.audit_nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $statusMessage.removeClass('error').addClass('success');
+                        $statusMessage.html(response.data.message + ' <a href="' + escapeHtml(response.data.report_url) + '" target="_blank">View Report</a>').show();
+
+                        // Reload page after 2 seconds to show new report in list
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 2000);
+                    } else {
+                        $statusMessage.removeClass('success').addClass('error');
+                        $statusMessage.text(response.data.message || 'Error generating report').show();
+                    }
+                },
+                error: function() {
+                    $statusMessage.removeClass('success').addClass('error');
+                    $statusMessage.text('Network error while generating report').show();
+                },
+                complete: function() {
+                    $btn.prop('disabled', false).text(originalText);
+                }
+            });
+        });
+    }
+
+    /**
+     * Load and display statistics
+     */
+    function loadStatistics(forceRefresh = false) {
+        $.ajax({
+            url: wpAltTextUpdater.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'alttext_audit_stats',
+                nonce: wpAltTextUpdater.audit_nonce,
+                force_refresh: forceRefresh ? 'true' : 'false'
+            },
+            success: function(response) {
+                if (response.success) {
+                    displayStatistics(response.data);
+                } else {
+                    showError('Failed to load statistics');
+                }
+            },
+            error: function() {
+                showError('Error loading statistics');
+            }
+        });
+    }
+
+    /**
+     * Display statistics in cards
+     */
+    function displayStatistics(stats) {
+        const html = `
+            <div class="audit-stat-card">
+                <h3>Total Images</h3>
+                <span class="audit-stat-number">${stats.total_images}</span>
+                <span class="audit-stat-label">Scanned</span>
+            </div>
+
+            <div class="audit-stat-card alert">
+                <h3>Missing Alt-Text</h3>
+                <span class="audit-stat-number">${stats.missing_alt}</span>
+                <span class="audit-stat-percentage">${stats.missing_percentage}%</span>
+                <span class="audit-stat-label">Need Attention</span>
+            </div>
+
+            <div class="audit-stat-card success">
+                <h3>Has Alt-Text</h3>
+                <span class="audit-stat-number">${stats.has_alt}</span>
+                <span class="audit-stat-percentage">${stats.has_percentage}%</span>
+                <span class="audit-stat-label">Complete</span>
+            </div>
+
+            <div class="audit-stat-card info">
+                <h3>Last Scan</h3>
+                <span class="audit-stat-number" style="font-size: 20px;">${stats.last_scan_human}</span>
+                <span class="audit-stat-label">${stats.last_scan_date || 'Never'}</span>
+            </div>
+        `;
+
+        $('#audit-stats-cards').html(html);
+    }
+
+    /**
+     * Start a scan (content or media)
+     */
+    function startScan(scanType) {
+        if (isScanning) {
+            alert('A scan is already in progress. Please wait for it to complete.');
+            return;
+        }
+
+        isScanning = true;
+        currentScanType = scanType;
+
+        // Disable buttons
+        $('#scan-content-btn, #scan-media-btn, #scan-drafts-btn, #clear-cache-btn').prop('disabled', true);
+
+        // Show progress bar
+        $('#scan-progress').show();
+        updateProgressBar(0);
+
+        // Start scanning from batch 0
+        processScanBatch(scanType, 0);
+    }
+
+    /**
+     * Process a single scan batch recursively
+     */
+    function processScanBatch(scanType, batch) {
+        $.ajax({
+            url: wpAltTextUpdater.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'alttext_audit_scan',
+                nonce: wpAltTextUpdater.audit_nonce,
+                scan_type: scanType,
+                batch: batch
+            },
+            success: function(response) {
+                if (response.success) {
+                    const data = response.data;
+
+                    // Update progress bar
+                    updateProgressBar(data.percentage);
+                    updateProgressText(`${data.message}`);
+
+                    // Continue scanning if not complete
+                    if (data.continue) {
+                        processScanBatch(scanType, data.current_batch + 1);
+                    } else {
+                        // Scan complete
+                        completeScan(scanType, data);
+                    }
+                } else {
+                    handleScanError(response.data ? response.data.message : 'Unknown error');
+                }
+            },
+            error: function(xhr, status, error) {
+                handleScanError(`Network error: ${error}`);
+            }
+        });
+    }
+
+    /**
+     * Update progress bar
+     */
+    function updateProgressBar(percentage) {
+        $('.audit-progress-fill').css('width', percentage + '%');
+        $('.audit-progress-text .percentage').text(percentage + '%');
+    }
+
+    /**
+     * Update progress text
+     */
+    function updateProgressText(text) {
+        $('.audit-progress-text').html(text + ' <span class="percentage">' +
+            $('.audit-progress-text .percentage').text() + '</span>');
+    }
+
+    /**
+     * Handle scan completion
+     */
+    function completeScan(scanType, data) {
+        isScanning = false;
+        currentScanType = null;
+
+        // Update progress to 100%
+        updateProgressBar(100);
+        updateProgressText('Scan complete!');
+
+        // Determine scan type label
+        const scanLabel = scanType === 'content' ? 'Published content' :
+                         scanType === 'drafts' ? 'Draft content' : 'Media library';
+
+        // Show completion message with link to Scans tab
+        const scansTabUrl = window.location.href.split('&tab=')[0] + '&tab=scans';
+        const message = `${scanLabel} scan completed! Found ${data.processed} images. ` +
+                       `<a href="${scansTabUrl}" style="color: #fff; text-decoration: underline; font-weight: 600;">View report in Scans tab →</a>`;
+
+        showSuccess(message);
+
+        // Reload statistics
+        setTimeout(function() {
+            loadStatistics(true);
+            $('#scan-progress').fadeOut();
+            resetProgressBar();
+            $('#scan-content-btn, #scan-media-btn, #scan-drafts-btn, #clear-cache-btn').prop('disabled', false);
+        }, 2000);
+    }
+
+    /**
+     * Handle scan errors
+     */
+    function handleScanError(message) {
+        isScanning = false;
+        currentScanType = null;
+
+        // Hide progress bar
+        $('#scan-progress').fadeOut();
+        resetProgressBar();
+
+        // Re-enable buttons
+        $('#scan-content-btn, #scan-media-btn, #scan-drafts-btn, #clear-cache-btn').prop('disabled', false);
+
+        // Show error
+        showError('Scan failed: ' + message);
+    }
+
+    /**
+     * Reset progress bar
+     */
+    function resetProgressBar() {
+        setTimeout(function() {
+            updateProgressBar(0);
+            updateProgressText('Scanning...');
+        }, 500);
+    }
+
+    /**
+     * Clear statistics cache
+     */
+    function clearCache() {
+        if (confirm('Are you sure you want to clear the statistics cache? This will force a recalculation on next load.')) {
+            // Just reload statistics with force refresh
+            showSuccess('Cache cleared. Reloading statistics...');
+            loadStatistics(true);
+        }
+    }
+
+    /**
+     * Show success message
+     */
+    function showSuccess(message) {
+        showNotice(message, 'success');
+    }
+
+    /**
+     * Show error message
+     */
+    function showError(message) {
+        showNotice(message, 'error');
+    }
+
+    /**
+     * Show notice
+     */
+    function showNotice(message, type) {
+        const $notice = $('<div class="notice notice-' + type + ' is-dismissible audit-notice ' + type + '"><p>' + message + '</p></div>');
+
+        $('.audit-tab-content').prepend($notice);
+
+        // Make dismissible
+        $notice.on('click', '.notice-dismiss', function() {
+            $notice.fadeOut(function() {
+                $(this).remove();
+            });
+        });
+
+        // Auto-dismiss after 5 seconds
+        setTimeout(function() {
+            $notice.fadeOut(function() {
+                $(this).remove();
+            });
+        }, 5000);
+    }
+
+    /**
+     * Load user attribution data
+     */
+    function loadUserAttribution() {
+        $.ajax({
+            url: wpAltTextUpdater.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'alttext_audit_users',
+                nonce: wpAltTextUpdater.audit_nonce
+            },
+            success: function(response) {
+                if (response.success) {
+                    displayUserAttribution(response.data);
+                } else {
+                    showError('Failed to load user attribution data');
+                }
+            },
+            error: function() {
+                showError('Error loading user attribution data');
+            }
+        });
+    }
+
+    /**
+     * Display user attribution table
+     */
+    function displayUserAttribution(data) {
+        if (!data.users || data.users.length === 0) {
+            $('#audit-user-results').html(`
+                <div class="audit-empty-state">
+                    <span class="dashicons dashicons-yes-alt"></span>
+                    <h3>${'No Missing Alt-Text Found'}</h3>
+                    <p>${'Great job! All users have properly added alt-text to their images.'}</p>
+                </div>
+            `);
+            return;
+        }
+
+        let html = `
+            <table class="wp-list-table widefat fixed striped audit-user-table">
+                <thead>
+                    <tr>
+                        <th class="column-user">User</th>
+                        <th class="column-missing-alt">Missing Alt-Text</th>
+                        <th class="column-total-images">Total Images</th>
+                        <th class="column-percentage">Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        data.users.forEach(function(user) {
+            let badgeClass = 'low';
+            if (user.missing_percentage >= 50) {
+                badgeClass = 'high';
+            } else if (user.missing_percentage >= 25) {
+                badgeClass = 'medium';
+            }
+
+            html += `
+                <tr>
+                    <td class="column-user">
+                        <strong class="audit-user-name">${escapeHtml(user.display_name)}</strong>
+                        <span class="audit-user-role">${escapeHtml(user.role)}</span>
+                    </td>
+                    <td class="column-missing-alt">
+                        <span class="missing-count">${user.missing_alt}</span>
+                    </td>
+                    <td class="column-total-images">
+                        ${user.total_images}
+                    </td>
+                    <td class="column-percentage">
+                        <span class="percentage-badge ${badgeClass}">${user.missing_percentage}%</span>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `
+                </tbody>
+            </table>
+        `;
+
+        // Add summary
+        if (data.summary) {
+            html = `
+                <div class="audit-notice info" style="margin-bottom: 20px;">
+                    <p>
+                        <strong>Summary:</strong>
+                        ${data.summary.users_with_missing} of ${data.summary.total_users} users have images with missing alt-text.
+                    </p>
+                </div>
+            ` + html;
+        }
+
+        $('#audit-user-results').html(html);
+    }
+
+    /**
+     * Escape HTML to prevent XSS
+     */
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+
+    /**
+     * Format number with commas
+     */
+    function formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+
+    /**
+     * Bind scans tab interactions
+     */
+    function bindScansTab() {
+        // Select all checkbox
+        $('#select-all-scans').on('change', function() {
+            $('.scan-checkbox').prop('checked', $(this).prop('checked'));
+        });
+
+        // Individual checkbox
+        $('.scan-checkbox').on('change', function() {
+            const allChecked = $('.scan-checkbox').length === $('.scan-checkbox:checked').length;
+            $('#select-all-scans').prop('checked', allChecked);
+        });
+
+        // View report button - open modal
+        $('.view-report-btn').on('click', function(e) {
+            e.preventDefault();
+            const reportUrl = $(this).data('report-url');
+            openReportModal(reportUrl);
+        });
+
+        // Close modal
+        $('.report-modal-close, .report-modal-overlay').on('click', function() {
+            closeReportModal();
+        });
+
+        // ESC key to close modal
+        $(document).on('keydown', function(e) {
+            if (e.key === 'Escape' && $('#report-modal').is(':visible')) {
+                closeReportModal();
+            }
+        });
+
+        // Bulk actions
+        $('#apply-bulk-action').on('click', function() {
+            const action = $('#bulk-action-selector-top').val();
+            const selectedScans = $('.scan-checkbox:checked').map(function() {
+                return $(this).val();
+            }).get();
+
+            if (action === '-1') {
+                alert('Please select an action.');
+                return;
+            }
+
+            if (selectedScans.length === 0) {
+                alert('Please select at least one scan.');
+                return;
+            }
+
+            if (action === 'delete') {
+                if (!confirm('Are you sure you want to delete ' + selectedScans.length + ' scan(s) and their associated reports? This cannot be undone.')) {
+                    return;
+                }
+
+                deleteBulkScans(selectedScans);
+            }
+        });
+    }
+
+    /**
+     * Open report modal
+     */
+    function openReportModal(reportUrl) {
+        $('#report-iframe').attr('src', reportUrl);
+        $('#report-modal').fadeIn(200);
+        $('body').css('overflow', 'hidden');
+    }
+
+    /**
+     * Close report modal
+     */
+    function closeReportModal() {
+        $('#report-modal').fadeOut(200);
+        $('#report-iframe').attr('src', '');
+        $('body').css('overflow', 'auto');
+    }
+
+    /**
+     * Delete bulk scans
+     */
+    function deleteBulkScans(scanIds) {
+        $.ajax({
+            url: wpAltTextUpdater.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'alttext_delete_scans',
+                nonce: wpAltTextUpdater.audit_nonce,
+                scan_ids: scanIds
+            },
+            success: function(response) {
+                if (response.success) {
+                    showSuccess('Deleted ' + response.data.deleted + ' scan(s) successfully.');
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showError(response.data.message || 'Failed to delete scans.');
+                }
+            },
+            error: function() {
+                showError('Error deleting scans. Please try again.');
+            }
+        });
+    }
+
+    /**
+     * Bind data management buttons
+     */
+    function bindDataManagement() {
+        // Save cleanup setting
+        $('#save-cleanup-setting-btn').on('click', function() {
+            var $btn = $(this);
+            var days = $('#auto-cleanup-days').val();
+            var originalText = $btn.text();
+
+            $btn.prop('disabled', true).text('Saving...');
+
+            $.ajax({
+                url: wpAltTextUpdater.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'alttext_save_cleanup_setting',
+                    nonce: wpAltTextUpdater.audit_nonce,
+                    days: days
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showSuccess(response.data.message);
+                    } else {
+                        showError(response.data.message || 'Failed to save setting.');
+                    }
+                },
+                error: function() {
+                    showError('Error saving setting. Please try again.');
+                },
+                complete: function() {
+                    $btn.prop('disabled', false).text(originalText);
+                }
+            });
+        });
+
+        // Clear all data
+        $('#clear-all-data-btn').on('click', function() {
+            if (!confirm('Are you sure you want to delete ALL scan records and reports?\n\nThis will permanently delete:\n- All scan history\n- All HTML reports\n- All scan statistics\n\nThis action CANNOT be undone!')) {
+                return;
+            }
+
+            // Second confirmation
+            if (!confirm('FINAL WARNING: This will delete everything. Are you absolutely sure?')) {
+                return;
+            }
+
+            var $btn = $(this);
+            var originalText = $btn.text();
+            var $statusMsg = $('#clear-data-status-message');
+
+            $btn.prop('disabled', true).text('Clearing Data...');
+            $statusMsg.hide();
+
+            $.ajax({
+                url: wpAltTextUpdater.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'alttext_clear_all_data',
+                    nonce: wpAltTextUpdater.audit_nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $statusMsg.removeClass('error').addClass('success');
+                        $statusMsg.text(response.data.message).show();
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 2000);
+                    } else {
+                        $statusMsg.removeClass('success').addClass('error');
+                        $statusMsg.text(response.data.message || 'Failed to clear data.').show();
+                        $btn.prop('disabled', false).text(originalText);
+                    }
+                },
+                error: function() {
+                    $statusMsg.removeClass('success').addClass('error');
+                    $statusMsg.text('Error clearing data. Please try again.').show();
+                    $btn.prop('disabled', false).text(originalText);
+                }
+            });
+        });
+    }
+
+    /**
+     * Initialize on page load
+     */
+    initDashboard();
+
+    // Initialize scans tab if on that tab
+    if ($('.audit-scans-wrapper').length) {
+        bindScansTab();
+    }
+
+    // Initialize data management buttons
+    bindDataManagement();
+});
