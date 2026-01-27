@@ -112,7 +112,6 @@ A comprehensive WordPress plugin for managing and auditing alt-text across your 
 2. View all your media library images with thumbnails
 3. Use the filters to find specific images:
 
-
    - Select "Missing Alt-Text" to see only images that need attention
    - Type in the search box to filter by filename or existing alt-text (live search)
    - Sort by clicking column headers (filename, status)
@@ -147,7 +146,6 @@ wp-alttext-auditor/
 ### Database Schema
 
 The plugin creates a custom table `wp_alttext_audit_results` to store scan results:
-
 
 - Tracks images from both post content and media library
 - Stores user attribution (post author/uploader)
@@ -393,7 +391,7 @@ See SECURITY-AUDIT.md for complete security audit report.
 - Automatic daily scanning: optional WP Cron background processing with enable/disable toggle
 - 24-hour statistics caching for performance
 
-#### Technical Implementation
+#### Technical Implementation (v1.0.0)
 
 - Custom database table for audit results with proper indexes
 - 4 new PHP classes: Audit Scanner, Storage, Dashboard, User Attribution
@@ -407,14 +405,14 @@ See SECURITY-AUDIT.md for complete security audit report.
 - Prepared statements for SQL injection prevention
 - XSS prevention with comprehensive escaping
 
-#### Performance
+#### Performance (v1.0.0)
 
 - Bulk database inserts
 - Transient caching
 - Lazy loading for dashboard tabs
 - Debounced auto-save
 
-#### Security
+#### Security (v1.0.0)
 
 - Multiple nonces for different actions (check_ajax_referer for consistency)
 - Capability checks (upload_files, manage_options)
