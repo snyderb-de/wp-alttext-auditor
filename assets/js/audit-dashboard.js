@@ -363,6 +363,7 @@ jQuery(document).ready(function($) {
         $.ajax({
             url: wpAltTextUpdater.ajax_url,
             type: 'POST',
+            timeout: 30000,
             data: {
                 action: 'alttext_audit_stats',
                 nonce: wpAltTextUpdater.audit_nonce,
@@ -372,11 +373,21 @@ jQuery(document).ready(function($) {
                 if (response.success) {
                     displayStatistics(response.data);
                 } else {
+                    $('#audit-stats-cards').html('<p style="color: #d63638;">Failed to load statistics: ' + (response.data?.message || 'Unknown error') + '</p>');
                     showError('Failed to load statistics');
                 }
             },
-            error: function() {
-                showError('Error loading statistics');
+            error: function(xhr, status, error) {
+                let errorMsg = 'Error loading statistics';
+                if (status === 'timeout') {
+                    errorMsg = 'Request timed out loading statistics';
+                } else if (xhr.responseText && xhr.responseText === '0') {
+                    errorMsg = 'AJAX handler not found - please deactivate and reactivate the plugin';
+                } else if (xhr.status) {
+                    errorMsg = 'Server error (' + xhr.status + ') loading statistics';
+                }
+                $('#audit-stats-cards').html('<p style="color: #d63638;">' + errorMsg + '</p>');
+                showError(errorMsg);
             }
         });
     }
@@ -449,6 +460,7 @@ jQuery(document).ready(function($) {
         $.ajax({
             url: wpAltTextUpdater.ajax_url,
             type: 'POST',
+            timeout: 60000,
             data: {
                 action: 'alttext_audit_scan',
                 nonce: wpAltTextUpdater.audit_nonce,
@@ -486,7 +498,15 @@ jQuery(document).ready(function($) {
                 }
             },
             error: function(xhr, status, error) {
-                handleScanError(`Network error: ${error}`);
+                let errorMsg = 'Network error';
+                if (status === 'timeout') {
+                    errorMsg = 'Request timed out - batch took too long';
+                } else if (xhr.responseText === '0') {
+                    errorMsg = 'AJAX handler not found - please deactivate and reactivate the plugin';
+                } else if (error) {
+                    errorMsg = `Network error: ${error}`;
+                }
+                handleScanError(errorMsg);
             }
         });
     }
