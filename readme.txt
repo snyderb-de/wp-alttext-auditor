@@ -4,7 +4,7 @@ Tags: alt-text, accessibility, media, images, wcag, seo
 Requires at least: 5.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.1.6
+Stable tag: 1.1.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,6 +66,15 @@ Yes! All text is internationalized and ready for translation. The text domain is
 6. CSV export with all filtered results
 
 == Changelog ==
+
+= 1.1.7 =
+*Release Date: January 29th, 2026*
+
+**Bug Fix: Save Functionality**
+
+* FIXED: Inline editing save button now works correctly on Missing Alt-Text tab
+* Simplified AJAX save process to use single call instead of two-step process
+* Save now updates both audit record AND media library in one operation
 
 = 1.1.6 =
 *Release Date: January 29th, 2026*

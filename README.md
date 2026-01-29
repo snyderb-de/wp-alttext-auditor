@@ -227,6 +227,15 @@ For support, please create an issue in the plugin repository or contact the plug
 
 ## Changelog
 
+### 1.1.7 (Bug Fix: Save Functionality)
+
+#### Fixed Alt-Text Save Not Working
+
+- **FIXED:** Inline editing save button now works correctly on Missing Alt-Text tab
+- Simplified AJAX save process to use single call instead of two-step process
+- Removed redundant `updateAuditRecord()` function
+- Save now updates both audit record AND media library in one operation
+
 ### 1.1.6 (Bug Fixes & Enhancements)
 
 #### Fixed Scan Report Counts

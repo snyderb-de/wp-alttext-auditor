@@ -159,46 +159,35 @@ jQuery(document).ready(function($) {
         $cancelBtn.prop('disabled', true);
         $spinner.addClass('is-active');
 
+        // Single AJAX call - updates both audit record AND media library
         $.ajax({
             url: wpAltTextUpdater.ajax_url,
             type: 'POST',
             data: {
-                action: 'update_alt_text',
-                nonce: wpAltTextUpdater.nonce,
-                attachment_id: attachmentId,
+                action: 'alttext_update_audit_record',
+                nonce: wpAltTextUpdater.audit_nonce,
+                result_id: resultId,
                 alt_text: altText
             },
             success: function(response) {
+                $spinner.removeClass('is-active');
+                $saveBtn.prop('disabled', false);
+                $cancelBtn.prop('disabled', false);
+
                 if (response.success) {
-                    // Update the audit record
-                    updateAuditRecord(resultId, altText, function(success) {
-                        $spinner.removeClass('is-active');
-                        $saveBtn.prop('disabled', false);
-                        $cancelBtn.prop('disabled', false);
+                    // Remove the row from the table (no longer missing)
+                    $row.closest('tr').fadeOut(400, function() {
+                        $(this).remove();
 
-                        if (success) {
-                            // Remove the row from the table (no longer missing)
-                            $row.closest('tr').fadeOut(400, function() {
-                                $(this).remove();
+                        // Show message
+                        showSuccess('Alt text updated successfully! Refreshing...');
 
-                                // Show message
-                                showSuccess('Alt text updated successfully! Refreshing...');
-
-                                // Reload page after 1 second to update counts
-                                setTimeout(function() {
-                                    window.location.reload();
-                                }, 1000);
-                            });
-                        } else {
-                            showError('Alt text saved but failed to update audit record.');
-                            $edit.hide();
-                            $row.find('.audit-alt-text-display').show();
-                        }
+                        // Reload page after 1 second to update counts
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 1000);
                     });
                 } else {
-                    $spinner.removeClass('is-active');
-                    $saveBtn.prop('disabled', false);
-                    $cancelBtn.prop('disabled', false);
                     showError('Failed to update alt text: ' + (response.data ? response.data.message : 'Unknown error'));
                 }
             },
@@ -211,32 +200,6 @@ jQuery(document).ready(function($) {
         });
     }
 
-    /**
-     * Update audit database record after alt-text is saved
-     * Syncs audit database with WordPress attachment meta
-     *
-     * @param {number} resultId - Audit database result ID
-     * @param {string} altText - New alt-text value
-     * @param {Function} callback - Callback function receiving success boolean
-     */
-    function updateAuditRecord(resultId, altText, callback) {
-        $.ajax({
-            url: wpAltTextUpdater.ajax_url,
-            type: 'POST',
-            data: {
-                action: 'alttext_update_audit_record',
-                nonce: wpAltTextUpdater.audit_nonce,
-                result_id: resultId,
-                alt_text: altText
-            },
-            success: function(response) {
-                callback(response.success);
-            },
-            error: function() {
-                callback(false);
-            }
-        });
-    }
 
     /**
      * Bind export CSV button handler
