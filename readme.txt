@@ -4,7 +4,7 @@ Tags: alt-text, accessibility, media, images, wcag, seo
 Requires at least: 5.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.1.8
+Stable tag: 1.1.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,6 +66,15 @@ Yes! All text is internationalized and ready for translation. The text domain is
 6. CSV export with all filtered results
 
 == Changelog ==
+
+= 1.1.9 =
+*Release Date: January 29th, 2026*
+
+**Critical Bug Fix**
+
+* FIXED: Network error when saving alt-text from audit dashboard
+* Changed get_table_name() method from private to public in storage class
+* Method was being called externally but had private visibility preventing saves
 
 = 1.1.8 =
 *Release Date: January 29th, 2026*

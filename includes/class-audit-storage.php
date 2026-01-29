@@ -35,7 +35,7 @@ class WP_AltText_Audit_Storage {
      *
      * @return string Full table name
      */
-    private function get_table_name() {
+    public function get_table_name() {
         global $wpdb;
         return $wpdb->prefix . $this->table_name;
     }

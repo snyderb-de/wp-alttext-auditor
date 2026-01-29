@@ -227,6 +227,15 @@ For support, please create an issue in the plugin repository or contact the plug
 
 ## Changelog
 
+### 1.1.9 (Critical Bug Fix)
+
+#### Fixed Network Error on Save
+
+- **FIXED:** Network error when saving alt-text from audit dashboard
+- Changed `get_table_name()` method from private to public in storage class
+- Method was being called externally but had private visibility
+- This was preventing save operations from completing successfully
+
 ### 1.1.8 (UX Enhancements: Quick Wins)
 
 #### Improved Inline Editing Experience
