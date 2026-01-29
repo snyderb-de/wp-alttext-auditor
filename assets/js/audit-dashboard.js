@@ -58,6 +58,7 @@ jQuery(document).ready(function($) {
 
         // Bind event handlers
         bindScanButtons();
+        bindCancelButton();
         bindClearCacheButton();
         bindQuickEditButtons();
         bindExportButton();
@@ -80,6 +81,15 @@ jQuery(document).ready(function($) {
 
         $('#scan-media-btn').on('click', function() {
             startScan('media');
+        });
+    }
+
+    /**
+     * Bind cancel scan button handler
+     */
+    function bindCancelButton() {
+        $('#cancel-scan-btn').on('click', function() {
+            cancelScan();
         });
     }
 
@@ -467,7 +477,12 @@ jQuery(document).ready(function($) {
                         completeScan(scanType, data);
                     }
                 } else {
-                    handleScanError(response.data ? response.data.message : 'Unknown error');
+                    // Check if scan was cancelled
+                    if (response.data && response.data.cancelled) {
+                        handleScanCancellation(response.data.message);
+                    } else {
+                        handleScanError(response.data ? response.data.message : 'Unknown error');
+                    }
                 }
             },
             error: function(xhr, status, error) {
@@ -582,11 +597,31 @@ jQuery(document).ready(function($) {
     }
 
     /**
+     * Handle scan cancellation
+     */
+    function handleScanCancellation(message) {
+        isScanning = false;
+        currentScanType = null;
+        scanStartTime = null;
+
+        // Hide progress bar
+        $('#scan-progress').fadeOut();
+        resetProgressBar();
+
+        // Re-enable buttons
+        $('#scan-content-btn, #scan-media-btn, #scan-drafts-btn, #clear-cache-btn').prop('disabled', false);
+
+        // Show info message
+        showNotice(message || 'Scan cancelled', 'warning');
+    }
+
+    /**
      * Handle scan errors
      */
     function handleScanError(message) {
         isScanning = false;
         currentScanType = null;
+        scanStartTime = null;
 
         // Hide progress bar
         $('#scan-progress').fadeOut();
@@ -597,6 +632,43 @@ jQuery(document).ready(function($) {
 
         // Show error
         showError('Scan failed: ' + message);
+    }
+
+    /**
+     * Cancel an in-progress scan
+     */
+    function cancelScan() {
+        if (!isScanning) {
+            return;
+        }
+
+        if (!confirm('Are you sure you want to cancel this scan? The scan will stop after the current batch completes.')) {
+            return;
+        }
+
+        // Disable cancel button to prevent multiple clicks
+        $('#cancel-scan-btn').prop('disabled', true).text('Cancelling...');
+
+        $.ajax({
+            url: wpAltTextUpdater.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'alttext_cancel_scan',
+                nonce: wpAltTextUpdater.audit_nonce
+            },
+            success: function(response) {
+                if (response.success) {
+                    showNotice(response.data.message, 'info');
+                } else {
+                    showError(response.data.message || 'Failed to cancel scan');
+                    $('#cancel-scan-btn').prop('disabled', false).text('Cancel Scan');
+                }
+            },
+            error: function() {
+                showError('Network error while cancelling scan');
+                $('#cancel-scan-btn').prop('disabled', false).text('Cancel Scan');
+            }
+        });
     }
 
     /**

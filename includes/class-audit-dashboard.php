@@ -118,6 +118,9 @@ class WP_AltText_Audit_Dashboard {
                 <p class="audit-progress-eta" style="font-size: 12px; color: #666; margin-top: 5px;">
                     <span class="eta-text"></span>
                 </p>
+                <button type="button" id="cancel-scan-btn" class="button" style="margin-top: 10px;">
+                    <?php _e('Cancel Scan', 'wp-alttext-updater'); ?>
+                </button>
                 <details class="audit-scan-details" style="margin-top: 10px; font-size: 12px;">
                     <summary style="cursor: pointer; color: #2271b1; user-select: none;">
                         <?php _e('Show scan details', 'wp-alttext-updater'); ?>

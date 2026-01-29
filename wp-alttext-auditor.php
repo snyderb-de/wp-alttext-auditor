@@ -3,7 +3,7 @@
  * Plugin Name: WP Alt Text Auditor
  * Plugin URI: https://github.com/snyderb-de/wp-alttext-auditor
  * Description: A comprehensive WordPress plugin for managing and auditing alt-text across your entire site with inline editing and powerful audit dashboard.
- * Version: 1.1.2
+ * Version: 1.1.3
  * Author: Bryan Snyder (snyderb-de@gmail.com)
  * License: GPL v2 or later
  * Text Domain: wp-alttext-auditor
@@ -45,6 +45,7 @@ class WP_AltText_Updater {
             add_action('wp_ajax_alttext_delete_scans', array($this, 'ajax_delete_scans'));
             add_action('wp_ajax_alttext_clear_all_data', array($this, 'ajax_clear_all_data'));
             add_action('wp_ajax_alttext_save_cleanup_setting', array($this, 'ajax_save_cleanup_setting'));
+            add_action('wp_ajax_alttext_cancel_scan', array($this, 'ajax_cancel_scan'));
             add_filter('manage_media_columns', array($this, 'add_alt_text_column'));
             add_action('manage_media_custom_column', array($this, 'display_alt_text_column'), 10, 2);
         }
@@ -459,6 +460,20 @@ class WP_AltText_Updater {
                 'message' => __('You do not have permission to perform this action.', 'wp-alttext-updater')
             ));
         }
+
+        // Check if scan has been cancelled
+        if (get_transient('alttext_audit_scan_cancelled')) {
+            delete_transient('alttext_audit_scan_cancelled');
+            delete_transient('alttext_audit_scan_progress');
+            delete_transient('alttext_audit_scan_start_time');
+            wp_send_json_error(array(
+                'message' => __('Scan cancelled by user.', 'wp-alttext-updater'),
+                'cancelled' => true
+            ));
+        }
+
+        // Set execution time limit to prevent timeouts (5 minutes per batch)
+        @set_time_limit(300);
 
         // Get parameters
         $scan_type = sanitize_text_field($_POST['scan_type']);
@@ -1064,6 +1079,26 @@ class WP_AltText_Updater {
             : sprintf(__('Auto-cleanup enabled. Scans older than %s days will be automatically deleted.', 'wp-alttext-updater'), $days);
 
         wp_send_json_success(array('message' => $message));
+    }
+
+    /**
+     * AJAX handler for cancelling an in-progress scan
+     */
+    public function ajax_cancel_scan() {
+        // Check nonce
+        check_ajax_referer('alttext_audit_nonce', 'nonce');
+
+        // Check permissions
+        if (!current_user_can('upload_files')) {
+            wp_send_json_error(array('message' => __('Insufficient permissions', 'wp-alttext-updater')), 403);
+        }
+
+        // Set cancellation flag
+        set_transient('alttext_audit_scan_cancelled', true, MINUTE_IN_SECONDS);
+
+        wp_send_json_success(array(
+            'message' => __('Scan cancellation requested. The scan will stop after the current batch completes.', 'wp-alttext-updater')
+        ));
     }
 
     /**
