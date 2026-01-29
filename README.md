@@ -227,6 +227,17 @@ For support, please create an issue in the plugin repository or contact the plug
 
 ## Changelog
 
+### 1.1.8 (UX Enhancements: Quick Wins)
+
+#### Improved Inline Editing Experience
+
+- **NEW:** Press Enter key to save alt-text (no need to click Save button)
+- **NEW:** Press Escape key to cancel editing
+- **NEW:** Green success checkmark shows briefly before row fades out
+- **NEW:** Character counter shows remaining characters (255 max) with color warnings
+- **NEW:** All other "Add Alt Text" buttons disabled while editing to prevent confusion
+- Better visual feedback throughout the save process
+
 ### 1.1.7 (Bug Fix: Save Functionality)
 
 #### Fixed Alt-Text Save Not Working

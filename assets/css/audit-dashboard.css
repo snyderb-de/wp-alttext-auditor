@@ -432,6 +432,7 @@
     padding: 5px 8px;
     border: 1px solid #8c8f94;
     border-radius: 3px;
+    margin-bottom: 5px;
 }
 
 .audit-save-quick-edit,
@@ -440,6 +441,20 @@
     padding: 4px 10px;
     height: auto;
     line-height: 1.4;
+}
+
+/* Character counter */
+.audit-char-counter {
+    display: block;
+    font-size: 11px;
+    color: #646970;
+    margin-bottom: 5px;
+}
+
+/* Disabled edit buttons */
+.audit-quick-edit-trigger.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 /* ==========================================================================

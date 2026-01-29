@@ -110,6 +110,10 @@ jQuery(document).ready(function($) {
         // Use event delegation for dynamically loaded content
         $(document).on('click', '.audit-quick-edit-trigger', function() {
             var $row = $(this).closest('td');
+
+            // Disable all other edit buttons while one is being edited
+            $('.audit-quick-edit-trigger').not(this).prop('disabled', true).addClass('disabled');
+
             $row.find('.audit-alt-text-display').hide();
             $row.find('.audit-alt-text-edit').show();
             $row.find('.audit-quick-edit-input').focus();
@@ -120,12 +124,57 @@ jQuery(document).ready(function($) {
             $row.find('.audit-alt-text-edit').hide();
             $row.find('.audit-alt-text-display').show();
             $row.find('.audit-quick-edit-input').val('');
+
+            // Re-enable all edit buttons
+            $('.audit-quick-edit-trigger').prop('disabled', false).removeClass('disabled');
         });
 
         $(document).on('click', '.audit-save-quick-edit', function() {
             var $row = $(this).closest('td');
+            triggerSave($row);
+        });
+
+        // Handle Enter key to save
+        $(document).on('keydown', '.audit-quick-edit-input', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                var $row = $(this).closest('td');
+                triggerSave($row);
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                $(this).closest('td').find('.audit-cancel-quick-edit').click();
+            }
+        });
+
+        // Character counter
+        $(document).on('input', '.audit-quick-edit-input', function() {
+            var length = $(this).val().length;
+            var maxLength = 255;
+            var remaining = maxLength - length;
+            var $counter = $(this).siblings('.audit-char-counter');
+
+            if ($counter.length === 0) {
+                $counter = $('<span class="audit-char-counter"></span>');
+                $(this).after($counter);
+            }
+
+            $counter.text(remaining + ' characters remaining');
+
+            if (remaining < 0) {
+                $counter.css('color', '#d63638');
+            } else if (remaining < 50) {
+                $counter.css('color', '#dba617');
+            } else {
+                $counter.css('color', '#646970');
+            }
+        });
+
+        /**
+         * Trigger save action for quick edit
+         * @param {jQuery} $row - Table row element
+         */
+        function triggerSave($row) {
             var $display = $row.find('.audit-alt-text-display');
-            var $edit = $row.find('.audit-alt-text-edit');
             var attachmentId = $display.data('attachment-id');
             var resultId = $display.data('result-id');
             var altText = $row.find('.audit-quick-edit-input').val().trim();
@@ -136,7 +185,7 @@ jQuery(document).ready(function($) {
             }
 
             saveQuickEdit(attachmentId, resultId, altText, $row);
-        });
+        }
     }
 
     /**
@@ -175,19 +224,31 @@ jQuery(document).ready(function($) {
                 $cancelBtn.prop('disabled', false);
 
                 if (response.success) {
-                    // Remove the row from the table (no longer missing)
-                    $row.closest('tr').fadeOut(400, function() {
-                        $(this).remove();
+                    // Hide edit mode and show success checkmark
+                    $edit.hide();
+                    var $display = $row.find('.audit-alt-text-display');
+                    $display.html('<span class="audit-status has-alt" style="color: #00a32a; font-weight: 600;"><span class="dashicons dashicons-yes-alt"></span> Saved!</span>').show();
 
-                        // Show message
-                        showSuccess('Alt text updated successfully! Refreshing...');
+                    // Re-enable all edit buttons
+                    $('.audit-quick-edit-trigger').prop('disabled', false).removeClass('disabled');
 
-                        // Reload page after 1 second to update counts
-                        setTimeout(function() {
-                            window.location.reload();
-                        }, 1000);
-                    });
+                    // Wait a moment, then fade out and remove row
+                    setTimeout(function() {
+                        $row.closest('tr').fadeOut(400, function() {
+                            $(this).remove();
+
+                            // Show message
+                            showSuccess('Alt text updated successfully! Refreshing...');
+
+                            // Reload page after 1 second to update counts
+                            setTimeout(function() {
+                                window.location.reload();
+                            }, 1000);
+                        });
+                    }, 800);
                 } else {
+                    // Re-enable all edit buttons on error
+                    $('.audit-quick-edit-trigger').prop('disabled', false).removeClass('disabled');
                     showError('Failed to update alt text: ' + (response.data ? response.data.message : 'Unknown error'));
                 }
             },
@@ -195,6 +256,8 @@ jQuery(document).ready(function($) {
                 $spinner.removeClass('is-active');
                 $saveBtn.prop('disabled', false);
                 $cancelBtn.prop('disabled', false);
+                // Re-enable all edit buttons on error
+                $('.audit-quick-edit-trigger').prop('disabled', false).removeClass('disabled');
                 showError('Network error while updating alt text.');
             }
         });

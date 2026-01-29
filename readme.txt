@@ -4,7 +4,7 @@ Tags: alt-text, accessibility, media, images, wcag, seo
 Requires at least: 5.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.1.7
+Stable tag: 1.1.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,6 +66,18 @@ Yes! All text is internationalized and ready for translation. The text domain is
 6. CSV export with all filtered results
 
 == Changelog ==
+
+= 1.1.8 =
+*Release Date: January 29th, 2026*
+
+**UX Enhancements: Quick Wins**
+
+* NEW: Press Enter key to save alt-text (no need to click Save button)
+* NEW: Press Escape key to cancel editing
+* NEW: Green success checkmark shows briefly before row fades out
+* NEW: Character counter shows remaining characters (255 max) with color warnings
+* NEW: All other "Add Alt Text" buttons disabled while editing to prevent confusion
+* Better visual feedback throughout the save process
 
 = 1.1.7 =
 *Release Date: January 29th, 2026*
