@@ -100,12 +100,21 @@ class WP_AltText_Audit_Scanner {
         $percentage = $total > 0 ? round(($processed / $total) * 100) : 100;
         $continue = $processed < $total;
 
+        // Get last processed item name for progress display
+        $last_item = '';
+        if ($query->post_count > 0) {
+            $posts = $query->posts;
+            $last_post = end($posts);
+            $last_item = $last_post->post_title ? $last_post->post_title : '(Untitled)';
+        }
+
         return array(
             'processed' => $processed,
             'total' => $total,
             'percentage' => $percentage,
             'continue' => $continue,
-            'results_count' => count($results)
+            'results_count' => count($results),
+            'last_item' => $last_item
         );
     }
 
@@ -172,12 +181,21 @@ class WP_AltText_Audit_Scanner {
         $percentage = $total > 0 ? round(($processed / $total) * 100) : 100;
         $continue = $processed < $total;
 
+        // Get last processed item name for progress display
+        $last_item = '';
+        if ($query->post_count > 0) {
+            $posts = $query->posts;
+            $last_post = end($posts);
+            $last_item = $last_post->post_title ? $last_post->post_title : '(Untitled)';
+        }
+
         return array(
             'processed' => $processed,
             'total' => $total,
             'percentage' => $percentage,
             'continue' => $continue,
-            'results_count' => count($results)
+            'results_count' => count($results),
+            'last_item' => $last_item
         );
     }
 
@@ -247,12 +265,21 @@ class WP_AltText_Audit_Scanner {
         $percentage = $total > 0 ? round(($processed / $total) * 100) : 100;
         $continue = $processed < $total;
 
+        // Get last processed item name for progress display
+        $last_item = '';
+        if ($query->post_count > 0) {
+            $posts = $query->posts;
+            $last_post = end($posts);
+            $last_item = $last_post->post_title ? $last_post->post_title : '(Untitled)';
+        }
+
         return array(
             'processed' => $processed,
             'total' => $total,
             'percentage' => $percentage,
             'continue' => $continue,
-            'results_count' => count($results)
+            'results_count' => count($results),
+            'last_item' => $last_item
         );
     }
 

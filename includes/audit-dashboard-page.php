@@ -71,11 +71,4 @@ $tabs = $this->get_tabs($current_tab);
         }
         ?>
     </div>
-
-    <!-- Plugin Footer -->
-    <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: right; color: #666; font-size: 12px;">
-        <p style="margin: 0;">
-            Built with <a href="https://claude.ai/code" target="_blank" style="color: #8A63D2; text-decoration: none;">Claude Code</a>
-        </p>
-    </div>
 </div>

@@ -548,6 +548,7 @@ class WP_AltText_Updater {
             'current_batch' => $batch,
             'results_count' => $result['results_count'],
             'scan_type' => $scan_type,
+            'current_item' => !empty($result['last_item']) ? sprintf(__('Scanning: %s', 'wp-alttext-updater'), $result['last_item']) : '',
             'message' => sprintf(
                 __('Processed %d of %d items (%d%%)', 'wp-alttext-updater'),
                 $result['processed'],

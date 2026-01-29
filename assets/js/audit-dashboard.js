@@ -30,6 +30,18 @@ jQuery(document).ready(function($) {
     let currentScanType = null;
 
     /**
+     * Scan start time for ETA calculation
+     * @type {number|null}
+     */
+    let scanStartTime = null;
+
+    /**
+     * Last item being scanned
+     * @type {string}
+     */
+    let lastScannedItem = '';
+
+    /**
      * Initialize dashboard on page load
      * Loads statistics, user attribution, and binds all event handlers
      */
@@ -405,6 +417,7 @@ jQuery(document).ready(function($) {
 
         isScanning = true;
         currentScanType = scanType;
+        scanStartTime = Date.now();
 
         // Disable buttons
         $('#scan-content-btn, #scan-media-btn, #scan-drafts-btn, #clear-cache-btn').prop('disabled', true);
@@ -412,6 +425,8 @@ jQuery(document).ready(function($) {
         // Show progress bar
         $('#scan-progress').show();
         updateProgressBar(0);
+        updateETA(0, 0, 0);
+        updateScanDetails('Initializing scan...');
 
         // Start scanning from batch 0
         processScanBatch(scanType, 0);
@@ -437,6 +452,12 @@ jQuery(document).ready(function($) {
                     // Update progress bar
                     updateProgressBar(data.percentage);
                     updateProgressText(`${data.message}`);
+                    updateETA(data.percentage, data.processed || 0, data.total || 0);
+
+                    // Update scan details with current item info
+                    if (data.current_item) {
+                        updateScanDetails(data.current_item);
+                    }
 
                     // Continue scanning if not complete
                     if (data.continue) {
@@ -467,8 +488,64 @@ jQuery(document).ready(function($) {
      * Update progress text
      */
     function updateProgressText(text) {
-        $('.audit-progress-text').html(text + ' <span class="percentage">' +
-            $('.audit-progress-text .percentage').text() + '</span>');
+        const currentPercentage = $('.audit-progress-text .percentage').text();
+        const currentItems = $('.audit-progress-text .scan-items').text();
+        $('.audit-progress-text').html(text + ' <span class="percentage">' + currentPercentage + '</span><span class="scan-items">' + currentItems + '</span>');
+    }
+
+    /**
+     * Update ETA display
+     */
+    function updateETA(percentage, processed, total) {
+        if (!scanStartTime || percentage === 0) {
+            $('.audit-progress-eta .eta-text').text('');
+            $('.audit-progress-text .scan-items').text('');
+            return;
+        }
+
+        // Calculate elapsed time in seconds
+        const elapsed = (Date.now() - scanStartTime) / 1000;
+
+        // Calculate estimated total time based on current progress
+        const estimatedTotal = (elapsed / percentage) * 100;
+        const remaining = estimatedTotal - elapsed;
+
+        // Format ETA
+        let etaText = '';
+        if (remaining > 0) {
+            const minutes = Math.floor(remaining / 60);
+            const seconds = Math.floor(remaining % 60);
+
+            if (minutes > 0) {
+                etaText = `ETA: ${minutes}m ${seconds}s remaining`;
+            } else {
+                etaText = `ETA: ${seconds}s remaining`;
+            }
+        }
+
+        $('.audit-progress-eta .eta-text').text(etaText);
+
+        // Update items count if available
+        if (total > 0) {
+            $('.audit-progress-text .scan-items').text(` (${processed} of ${total})`);
+        }
+    }
+
+    /**
+     * Update scan details with current item
+     */
+    function updateScanDetails(item) {
+        if (!item || item === lastScannedItem) {
+            return;
+        }
+
+        lastScannedItem = item;
+        const timestamp = new Date().toLocaleTimeString();
+        const $content = $('.current-scan-item');
+
+        // Add new line with timestamp
+        const newLine = `[${timestamp}] ${item}`;
+        $content.text(newLine);
     }
 
     /**
@@ -477,10 +554,12 @@ jQuery(document).ready(function($) {
     function completeScan(scanType, data) {
         isScanning = false;
         currentScanType = null;
+        scanStartTime = null;
 
         // Update progress to 100%
         updateProgressBar(100);
         updateProgressText('Scan complete!');
+        $('.audit-progress-eta .eta-text').text('');
 
         // Determine scan type label
         const scanLabel = scanType === 'content' ? 'Published content' :
@@ -527,6 +606,11 @@ jQuery(document).ready(function($) {
         setTimeout(function() {
             updateProgressBar(0);
             updateProgressText('Scanning...');
+            $('.audit-progress-eta .eta-text').text('');
+            $('.audit-progress-text .scan-items').text('');
+            $('.current-scan-item').text('Initializing scan...');
+            scanStartTime = null;
+            lastScannedItem = '';
         }, 500);
     }
 

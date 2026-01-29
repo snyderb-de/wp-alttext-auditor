@@ -110,7 +110,24 @@ class WP_AltText_Audit_Dashboard {
                 <div class="audit-progress-bar">
                     <div class="audit-progress-fill" style="width: 0%"></div>
                 </div>
-                <p class="audit-progress-text"><?php _e('Scanning...', 'wp-alttext-updater'); ?> <span class="percentage">0%</span></p>
+                <p class="audit-progress-text">
+                    <?php _e('Scanning...', 'wp-alttext-updater'); ?>
+                    <span class="percentage">0%</span>
+                    <span class="scan-items"></span>
+                </p>
+                <p class="audit-progress-eta" style="font-size: 12px; color: #666; margin-top: 5px;">
+                    <span class="eta-text"></span>
+                </p>
+                <details class="audit-scan-details" style="margin-top: 10px; font-size: 12px;">
+                    <summary style="cursor: pointer; color: #2271b1; user-select: none;">
+                        <?php _e('Show scan details', 'wp-alttext-updater'); ?>
+                    </summary>
+                    <div class="scan-details-content" style="margin-top: 10px; padding: 10px; background: #f6f7f7; border-radius: 3px; max-height: 200px; overflow-y: auto;">
+                        <p style="margin: 0; font-family: monospace; font-size: 11px; color: #555;">
+                            <span class="current-scan-item"><?php _e('Initializing scan...', 'wp-alttext-updater'); ?></span>
+                        </p>
+                    </div>
+                </details>
             </div>
 
             <!-- Quick Help -->
