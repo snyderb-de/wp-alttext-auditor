@@ -4,7 +4,7 @@ Tags: alt-text, accessibility, media, images, wcag, seo
 Requires at least: 5.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.1.5
+Stable tag: 1.1.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,6 +66,17 @@ Yes! All text is internationalized and ready for translation. The text domain is
 6. CSV export with all filtered results
 
 == Changelog ==
+
+= 1.1.6 =
+*Release Date: January 29th, 2026*
+
+**Bug Fixes & Enhancements**
+
+* FIXED: Scan history table now correctly displays Total Images and Missing Alt counts (previously showed 0)
+* FIXED: Key mapping mismatch between statistics storage and scan records
+* ENHANCED: Inline alt-text editing now works for published content images, not just media library
+* ENHANCED: Editing from audit dashboard saves to BOTH audit record AND media library
+* Improved user workflow for fixing post content images directly from Missing Alt-Text tab
 
 = 1.1.2 =
 *Release Date: January 21st, 2026*

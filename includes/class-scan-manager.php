@@ -52,6 +52,13 @@ class WP_AltText_Scan_Manager {
 
         $scan = wp_parse_args($args, $defaults);
 
+        // If stats were passed from get_statistics(), map the keys
+        if (isset($args['stats']['total_images'])) {
+            $scan['stats']['total'] = $args['stats']['total_images'];
+            $scan['stats']['missing'] = $args['stats']['missing_alt'];
+            $scan['stats']['has_alt'] = $args['stats']['has_alt'];
+        }
+
         // Generate unique scan ID
         $scan_id = 'scan_' . current_time('timestamp') . '_' . wp_rand(1000, 9999);
 

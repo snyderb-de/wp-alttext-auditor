@@ -3,7 +3,7 @@
  * Plugin Name: WP Alt Text Auditor
  * Plugin URI: https://github.com/snyderb-de/wp-alttext-auditor
  * Description: A comprehensive WordPress plugin for managing and auditing alt-text across your entire site with inline editing and powerful audit dashboard.
- * Version: 1.1.5
+ * Version: 1.1.6
  * Author: Bryan Snyder (snyderb-de@gmail.com)
  * License: GPL v2 or later
  * Text Domain: wp-alttext-auditor
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('WP_ALTTEXT_UPDATER_VERSION', '1.1.2');
+define('WP_ALTTEXT_UPDATER_VERSION', '1.1.6');
 define('WP_ALTTEXT_UPDATER_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('WP_ALTTEXT_UPDATER_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -678,10 +678,30 @@ class WP_AltText_Updater {
         require_once WP_ALTTEXT_UPDATER_PLUGIN_DIR . 'includes/class-audit-storage.php';
         $storage = new WP_AltText_Audit_Storage();
 
-        // Update the audit record
+        // Get the audit record to check for attachment_id
         global $wpdb;
         $table_name = $storage->get_table_name();
 
+        $result = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM {$table_name} WHERE id = %d",
+            $result_id
+        ));
+
+        if (!$result) {
+            wp_send_json_error(array(
+                'message' => __('Result not found.', 'wp-alttext-updater')
+            ));
+        }
+
+        // If this result has an attachment_id, update the media library too
+        if ($result->attachment_id) {
+            $attachment = get_post($result->attachment_id);
+            if ($attachment && $attachment->post_type === 'attachment') {
+                update_post_meta($result->attachment_id, '_wp_attachment_image_alt', $alt_text);
+            }
+        }
+
+        // Update the audit record
         $updated = $wpdb->update(
             $table_name,
             array(
@@ -699,8 +719,9 @@ class WP_AltText_Updater {
             delete_transient('alttext_audit_stats_cache');
 
             wp_send_json_success(array(
-                'message' => __('Audit record updated successfully.', 'wp-alttext-updater'),
-                'updated' => $updated
+                'message' => __('Alt-text saved successfully.', 'wp-alttext-updater'),
+                'updated' => $updated,
+                'saved_to_media' => !empty($result->attachment_id)
             ));
         } else {
             wp_send_json_error(array(

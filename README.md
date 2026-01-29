@@ -227,6 +227,21 @@ For support, please create an issue in the plugin repository or contact the plug
 
 ## Changelog
 
+### 1.1.6 (Bug Fixes & Enhancements)
+
+#### Fixed Scan Report Counts
+
+- **FIXED:** Scan history table now correctly displays Total Images and Missing Alt counts
+- Fixed key mapping mismatch between statistics storage and scan records
+- Scan reports previously showed 0 for total and missing counts while "Has Alt" was correct
+
+#### Enhanced Inline Editing
+
+- **ENHANCED:** Inline alt-text editing now works for published content images (not just media library)
+- When editing from audit dashboard, alt-text is saved to BOTH the audit record AND the media library
+- Improved user workflow - can now fix post content images directly from Missing Alt-Text tab
+- Better messaging when images don't have attachment IDs and can't be edited inline
+
 ### 1.0.5 (Bug Fix: Report Generation)
 
 #### Fixed Report Generation Issue

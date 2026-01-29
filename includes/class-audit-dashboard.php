@@ -642,7 +642,7 @@ class WP_AltText_Audit_Dashboard {
                                     <?php echo esc_html($user_name); ?>
                                 </td>
                                 <td class="column-alt-text">
-                                    <?php if ($result->attachment_id && wp_attachment_is_image($result->attachment_id)) : ?>
+                                    <?php if ($result->attachment_id) : ?>
                                         <div class="audit-alt-text-display" data-attachment-id="<?php echo esc_attr($result->attachment_id); ?>" data-result-id="<?php echo esc_attr($result->id); ?>">
                                             <span class="audit-status no-alt">
                                                 <span class="dashicons dashicons-warning"></span>
@@ -668,7 +668,7 @@ class WP_AltText_Audit_Dashboard {
                                             <?php _e('Missing', 'wp-alttext-updater'); ?>
                                         </span>
                                         <br>
-                                        <small><em><?php _e('No attachment found', 'wp-alttext-updater'); ?></em></small>
+                                        <small><em><?php _e('No attachment ID - cannot edit from here', 'wp-alttext-updater'); ?></em></small>
                                     <?php endif; ?>
                                 </td>
                             </tr>
