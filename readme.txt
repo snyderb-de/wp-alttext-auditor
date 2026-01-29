@@ -1,5 +1,6 @@
 === WP Alt Text Auditor ===
-Contributors: (your-wordpress-username)
+Contributors: thestrangeloop
+Author Name: Bryan Snyder (snyderb.de@gmail.com)
 Tags: alt-text, accessibility, media, images, wcag, seo
 Requires at least: 5.0
 Tested up to: 6.7
