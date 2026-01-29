@@ -3,7 +3,7 @@
  * Plugin Name: WP Alt Text Auditor
  * Plugin URI: https://github.com/snyderb-de/wp-alttext-auditor
  * Description: A comprehensive WordPress plugin for managing and auditing alt-text across your entire site with inline editing and powerful audit dashboard.
- * Version: 1.1.4
+ * Version: 1.1.5
  * Author: Bryan Snyder (snyderb-de@gmail.com)
  * License: GPL v2 or later
  * Text Domain: wp-alttext-auditor
@@ -347,12 +347,12 @@ class WP_AltText_Updater {
      */
     public function enqueue_admin_scripts($hook) {
         // Only load on media library page, alt text manager page, and audit dashboard
-        if ($hook !== 'upload.php' && $hook !== 'media_page_wp-alttext-manager' && $hook !== 'media_page_wp-alttext-audit') {
+        if ($hook !== 'upload.php' && $hook !== 'media_page_wp-alttext-auditor-manager' && $hook !== 'media_page_wp-alttext-auditor-audit') {
             return;
         }
 
         // Load admin JS only on media library and alt text manager pages
-        if ($hook === 'upload.php' || $hook === 'media_page_wp-alttext-manager') {
+        if ($hook === 'upload.php' || $hook === 'media_page_wp-alttext-auditor-manager') {
             wp_enqueue_script(
                 'wp-alttext-updater-admin',
                 WP_ALTTEXT_UPDATER_PLUGIN_URL . 'assets/js/admin.js',
@@ -370,7 +370,7 @@ class WP_AltText_Updater {
         }
 
         // Enqueue audit dashboard assets only on audit page
-        if ($hook === 'media_page_wp-alttext-audit') {
+        if ($hook === 'media_page_wp-alttext-auditor-audit') {
             wp_enqueue_script(
                 'wp-alttext-updater-audit-dashboard',
                 WP_ALTTEXT_UPDATER_PLUGIN_URL . 'assets/js/audit-dashboard.js',
@@ -388,7 +388,7 @@ class WP_AltText_Updater {
         }
 
         // Localize script for AJAX - use appropriate script handle based on page
-        $script_handle = ($hook === 'media_page_wp-alttext-audit') ? 'wp-alttext-updater-audit-dashboard' : 'wp-alttext-updater-admin';
+        $script_handle = ($hook === 'media_page_wp-alttext-auditor-audit') ? 'wp-alttext-updater-audit-dashboard' : 'wp-alttext-updater-admin';
 
         wp_localize_script($script_handle, 'wpAltTextUpdater', array(
             'ajax_url' => admin_url('admin-ajax.php'),
