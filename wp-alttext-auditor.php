@@ -694,11 +694,18 @@ class WP_AltText_Updater {
         }
 
         // If this result has an attachment_id, update the media library too
+        $saved_to_media = false;
         if ($result->attachment_id) {
             $attachment = get_post($result->attachment_id);
             if ($attachment && $attachment->post_type === 'attachment') {
                 update_post_meta($result->attachment_id, '_wp_attachment_image_alt', $alt_text);
+                $saved_to_media = true;
+                error_log("WP Alt Text Auditor: Updated attachment {$result->attachment_id} with alt-text: {$alt_text}");
+            } else {
+                error_log("WP Alt Text Auditor: Attachment {$result->attachment_id} not found or not an attachment");
             }
+        } else {
+            error_log("WP Alt Text Auditor: Result {$result_id} has no attachment_id");
         }
 
         // Update the audit record
@@ -721,7 +728,8 @@ class WP_AltText_Updater {
             wp_send_json_success(array(
                 'message' => __('Alt-text saved successfully.', 'wp-alttext-updater'),
                 'updated' => $updated,
-                'saved_to_media' => !empty($result->attachment_id)
+                'saved_to_media' => $saved_to_media,
+                'attachment_id' => $result->attachment_id
             ));
         } else {
             wp_send_json_error(array(
