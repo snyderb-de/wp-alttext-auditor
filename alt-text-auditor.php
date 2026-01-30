@@ -1467,7 +1467,7 @@ class WP_AltText_Updater {
             global $wpdb;
 
             // Get all blog IDs
-            $blog_ids = $wpdb->get_col("SELECT blog_id FROM $wpdb->blogs");
+            $blog_ids = $wpdb->get_col("SELECT blog_id FROM {$wpdb->blogs}");
 
             foreach ($blog_ids as $blog_id) {
                 switch_to_blog($blog_id);
@@ -1504,7 +1504,7 @@ class WP_AltText_Updater {
             // Network deactivation - clear for all sites
             global $wpdb;
 
-            $blog_ids = $wpdb->get_col("SELECT blog_id FROM $wpdb->blogs");
+            $blog_ids = $wpdb->get_col("SELECT blog_id FROM {$wpdb->blogs}");
 
             foreach ($blog_ids as $blog_id) {
                 switch_to_blog($blog_id);

@@ -146,15 +146,15 @@ class WP_AltText_HTML_Report {
 
         <div class="stats-grid">
             <div class="stat-card info">
-                <div class="stat-value"><?php echo number_format($stats['total_images']); ?></div>
+                <div class="stat-value"><?php echo esc_html(number_format($stats['total_images'])); ?></div>
                 <div class="stat-label">Total Images Scanned</div>
             </div>
             <div class="stat-card danger">
-                <div class="stat-value"><?php echo number_format($stats['missing_alt']); ?></div>
+                <div class="stat-value"><?php echo esc_html(number_format($stats['missing_alt'])); ?></div>
                 <div class="stat-label">Missing Alt-Text (<?php echo esc_html($stats['missing_percentage']); ?>%)</div>
             </div>
             <div class="stat-card success">
-                <div class="stat-value"><?php echo number_format($stats['has_alt']); ?></div>
+                <div class="stat-value"><?php echo esc_html(number_format($stats['has_alt'])); ?></div>
                 <div class="stat-label">Has Alt-Text (<?php echo esc_html($stats['has_percentage']); ?>%)</div>
             </div>
             <div class="stat-card">
@@ -178,9 +178,9 @@ class WP_AltText_HTML_Report {
                 <?php foreach ($stats['by_source'] as $source => $data): ?>
                 <tr>
                     <td><?php echo $source === 'post_content' ? 'Post Content' : 'Media Library'; ?></td>
-                    <td><?php echo number_format($data['total']); ?></td>
-                    <td><?php echo number_format($data['missing']); ?></td>
-                    <td class="percentage"><?php echo $data['total'] > 0 ? round(($data['missing'] / $data['total']) * 100, 1) : 0; ?>%</td>
+                    <td><?php echo esc_html(number_format($data['total'])); ?></td>
+                    <td><?php echo esc_html(number_format($data['missing'])); ?></td>
+                    <td class="percentage"><?php echo esc_html($data['total'] > 0 ? round(($data['missing'] / $data['total']) * 100, 1) : 0); ?>%</td>
                 </tr>
                 <?php endforeach; ?>
             </tbody>
@@ -204,8 +204,8 @@ class WP_AltText_HTML_Report {
                 <tr>
                     <td class="user-name"><?php echo esc_html($user['display_name']); ?></td>
                     <td><?php echo esc_html($user['role']); ?></td>
-                    <td><?php echo number_format($user['total_images']); ?></td>
-                    <td><?php echo number_format($user['missing_alt']); ?></td>
+                    <td><?php echo esc_html(number_format($user['total_images'])); ?></td>
+                    <td><?php echo esc_html(number_format($user['missing_alt'])); ?></td>
                     <td class="percentage"><?php echo esc_html($user['missing_percentage']); ?>%</td>
                 </tr>
                 <?php endforeach; ?>
@@ -274,7 +274,7 @@ class WP_AltText_HTML_Report {
                 <?php if ($missing_items['total'] > 500): ?>
                 <tr>
                     <td colspan="5" style="text-align: center; color: #666; font-style: italic;">
-                        ... and <?php echo number_format($missing_items['total'] - 500); ?> more images.
+                        ... and <?php echo esc_html(number_format($missing_items['total'] - 500)); ?> more images.
                         View full list in WordPress admin dashboard.
                     </td>
                 </tr>

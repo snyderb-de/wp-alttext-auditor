@@ -393,13 +393,13 @@ class WP_AltText_Audit_Dashboard {
                                         <?php echo esc_html($user_name); ?>
                                     </td>
                                     <td class="column-total">
-                                        <?php echo number_format($scan['stats']['total']); ?>
+                                        <?php echo esc_html(number_format($scan['stats']['total'])); ?>
                                     </td>
                                     <td class="column-missing">
-                                        <strong style="color: #d63638;"><?php echo number_format($scan['stats']['missing']); ?></strong>
+                                        <strong style="color: #d63638;"><?php echo esc_html(number_format($scan['stats']['missing'])); ?></strong>
                                     </td>
                                     <td class="column-has-alt">
-                                        <strong style="color: #00a32a;"><?php echo number_format($scan['stats']['has_alt']); ?></strong>
+                                        <strong style="color: #00a32a;"><?php echo esc_html(number_format($scan['stats']['has_alt'])); ?></strong>
                                     </td>
                                     <td class="column-report">
                                         <?php if (!empty($scan['report_filename'])) :
@@ -812,12 +812,12 @@ class WP_AltText_Audit_Dashboard {
         global $wpdb;
         $table_name = $wpdb->prefix . 'alttext_audit_results';
 
-        $user_ids = $wpdb->get_col("
+        $user_ids = $wpdb->get_col($wpdb->prepare("
             SELECT DISTINCT user_id
             FROM {$table_name}
-            WHERE has_alt = 0
+            WHERE has_alt = %d
             ORDER BY user_id ASC
-        ");
+        ", 0));
 
         $users = array();
         foreach ($user_ids as $user_id) {
@@ -839,12 +839,12 @@ class WP_AltText_Audit_Dashboard {
         global $wpdb;
         $table_name = $wpdb->prefix . 'alttext_audit_results';
 
-        $post_types = $wpdb->get_col("
+        $post_types = $wpdb->get_col($wpdb->prepare("
             SELECT DISTINCT post_type
             FROM {$table_name}
-            WHERE has_alt = 0 AND post_type IS NOT NULL
+            WHERE has_alt = %d AND post_type IS NOT NULL
             ORDER BY post_type ASC
-        ");
+        ", 0));
 
         return $post_types;
     }

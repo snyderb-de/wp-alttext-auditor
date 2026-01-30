@@ -124,12 +124,12 @@ $sites = get_sites(array('number' => 1000)); // Get up to 1000 sites
                 <td colspan="2"><strong><?php echo esc_html__('Network Totals', 'alt-text-auditor'); ?></strong></td>
                 <td><strong><?php echo esc_html($network_total_images); ?></strong></td>
                 <td>
-                    <strong style="color: <?php echo $network_missing_alt > 0 ? '#d63638' : '#00a32a'; ?>;">
+                    <strong style="color: <?php echo esc_attr($network_missing_alt > 0 ? '#d63638' : '#00a32a'); ?>;">
                         <?php echo esc_html($network_missing_alt); ?>
                     </strong>
                 </td>
                 <td>
-                    <strong style="color: <?php echo $network_compliance >= 90 ? '#00a32a' : ($network_compliance >= 70 ? '#dba617' : '#d63638'); ?>;">
+                    <strong style="color: <?php echo esc_attr($network_compliance >= 90 ? '#00a32a' : ($network_compliance >= 70 ? '#dba617' : '#d63638')); ?>;">
                         <?php echo esc_html($network_compliance); ?>%
                     </strong>
                 </td>
