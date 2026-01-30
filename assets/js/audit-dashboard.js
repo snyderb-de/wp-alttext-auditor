@@ -210,11 +210,11 @@ jQuery(document).ready(function($) {
 
         // Single AJAX call - updates both audit record AND media library
         $.ajax({
-            url: wpAltTextUpdater.ajax_url,
+            url: altTextAuditor.ajax_url,
             type: 'POST',
             data: {
                 action: 'alttext_update_audit_record',
-                nonce: wpAltTextUpdater.audit_nonce,
+                nonce: altTextAuditor.audit_nonce,
                 result_id: resultId,
                 alt_text: altText
             },
@@ -281,9 +281,9 @@ jQuery(document).ready(function($) {
             };
 
             // Build export URL with filters
-            var exportUrl = wpAltTextUpdater.ajax_url +
+            var exportUrl = altTextAuditor.ajax_url +
                 '?action=alttext_audit_export' +
-                '&nonce=' + wpAltTextUpdater.audit_nonce +
+                '&nonce=' + altTextAuditor.audit_nonce +
                 '&filter_user=' + encodeURIComponent(filters.filter_user) +
                 '&filter_content_type=' + encodeURIComponent(filters.filter_content_type) +
                 '&filter_post_type=' + encodeURIComponent(filters.filter_post_type) +
@@ -303,11 +303,11 @@ jQuery(document).ready(function($) {
             var $statusMessage = $('#cron-status-message');
 
             $.ajax({
-                url: wpAltTextUpdater.ajax_url,
+                url: altTextAuditor.ajax_url,
                 type: 'POST',
                 data: {
                     action: 'alttext_toggle_cron',
-                    nonce: wpAltTextUpdater.audit_nonce,
+                    nonce: altTextAuditor.audit_nonce,
                     enabled: enabled ? 'true' : 'false'
                 },
                 success: function(response) {
@@ -351,11 +351,11 @@ jQuery(document).ready(function($) {
             $statusMessage.hide();
 
             $.ajax({
-                url: wpAltTextUpdater.ajax_url,
+                url: altTextAuditor.ajax_url,
                 type: 'POST',
                 data: {
                     action: 'alttext_generate_report',
-                    nonce: wpAltTextUpdater.audit_nonce
+                    nonce: altTextAuditor.audit_nonce
                 },
                 success: function(response) {
                     if (response.success) {
@@ -387,12 +387,12 @@ jQuery(document).ready(function($) {
      */
     function loadStatistics(forceRefresh = false) {
         $.ajax({
-            url: wpAltTextUpdater.ajax_url,
+            url: altTextAuditor.ajax_url,
             type: 'POST',
             timeout: 30000,
             data: {
                 action: 'alttext_audit_stats',
-                nonce: wpAltTextUpdater.audit_nonce,
+                nonce: altTextAuditor.audit_nonce,
                 force_refresh: forceRefresh ? 'true' : 'false'
             },
             success: function(response) {
@@ -484,12 +484,12 @@ jQuery(document).ready(function($) {
      */
     function processScanBatch(scanType, batch) {
         $.ajax({
-            url: wpAltTextUpdater.ajax_url,
+            url: altTextAuditor.ajax_url,
             type: 'POST',
             timeout: 60000,
             data: {
                 action: 'alttext_audit_scan',
-                nonce: wpAltTextUpdater.audit_nonce,
+                nonce: altTextAuditor.audit_nonce,
                 scan_type: scanType,
                 batch: batch
             },
@@ -696,11 +696,11 @@ jQuery(document).ready(function($) {
         $('#cancel-scan-btn').prop('disabled', true).text('Cancelling...');
 
         $.ajax({
-            url: wpAltTextUpdater.ajax_url,
+            url: altTextAuditor.ajax_url,
             type: 'POST',
             data: {
                 action: 'alttext_cancel_scan',
-                nonce: wpAltTextUpdater.audit_nonce
+                nonce: altTextAuditor.audit_nonce
             },
             success: function(response) {
                 if (response.success) {
@@ -785,11 +785,11 @@ jQuery(document).ready(function($) {
      */
     function loadUserAttribution() {
         $.ajax({
-            url: wpAltTextUpdater.ajax_url,
+            url: altTextAuditor.ajax_url,
             type: 'POST',
             data: {
                 action: 'alttext_audit_users',
-                nonce: wpAltTextUpdater.audit_nonce
+                nonce: altTextAuditor.audit_nonce
             },
             success: function(response) {
                 if (response.success) {
@@ -984,11 +984,11 @@ jQuery(document).ready(function($) {
      */
     function deleteBulkScans(scanIds) {
         $.ajax({
-            url: wpAltTextUpdater.ajax_url,
+            url: altTextAuditor.ajax_url,
             type: 'POST',
             data: {
                 action: 'alttext_delete_scans',
-                nonce: wpAltTextUpdater.audit_nonce,
+                nonce: altTextAuditor.audit_nonce,
                 scan_ids: scanIds
             },
             success: function(response) {
@@ -1020,11 +1020,11 @@ jQuery(document).ready(function($) {
             $btn.prop('disabled', true).text('Saving...');
 
             $.ajax({
-                url: wpAltTextUpdater.ajax_url,
+                url: altTextAuditor.ajax_url,
                 type: 'POST',
                 data: {
                     action: 'alttext_save_cleanup_setting',
-                    nonce: wpAltTextUpdater.audit_nonce,
+                    nonce: altTextAuditor.audit_nonce,
                     days: days
                 },
                 success: function(response) {
@@ -1062,11 +1062,11 @@ jQuery(document).ready(function($) {
             $statusMsg.hide();
 
             $.ajax({
-                url: wpAltTextUpdater.ajax_url,
+                url: altTextAuditor.ajax_url,
                 type: 'POST',
                 data: {
                     action: 'alttext_clear_all_data',
-                    nonce: wpAltTextUpdater.audit_nonce
+                    nonce: altTextAuditor.audit_nonce
                 },
                 success: function(response) {
                     if (response.success) {

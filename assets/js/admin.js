@@ -105,11 +105,11 @@ jQuery(document).ready(function($) {
             action: 'update_alt_text',
             attachment_id: attachmentId,
             alt_text: altText,
-            nonce: wpAltTextUpdater.nonce
+            nonce: altTextAuditor.nonce
         };
         
         $.ajax({
-            url: wpAltTextUpdater.ajax_url,
+            url: altTextAuditor.ajax_url,
             type: 'POST',
             data: data,
             success: function(response) {
@@ -127,11 +127,11 @@ jQuery(document).ready(function($) {
                         hideAllIndicators($input);
                     }, 2000);
                 } else {
-                    handleSaveError($input, response.data ? response.data.message : wpAltTextUpdater.error_text);
+                    handleSaveError($input, response.data ? response.data.message : altTextAuditor.error_text);
                 }
             },
             error: function(xhr, status, error) {
-                handleSaveError($input, wpAltTextUpdater.error_text);
+                handleSaveError($input, altTextAuditor.error_text);
                 console.error('Alt text save error:', error);
             }
         });

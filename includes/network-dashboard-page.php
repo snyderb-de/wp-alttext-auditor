@@ -20,36 +20,36 @@ $sites = get_sites(array('number' => 1000)); // Get up to 1000 sites
 
 ?>
 <div class="wrap">
-    <h1><?php echo esc_html__('Network-Wide Alt-Text Audit', 'wp-alttext-auditor'); ?></h1>
+    <h1><?php echo esc_html__('Network-Wide Alt-Text Audit', 'alt-text-auditor'); ?></h1>
 
     <div class="notice notice-info">
         <p>
-            <strong><?php echo esc_html__('Multisite Mode:', 'wp-alttext-auditor'); ?></strong>
+            <strong><?php echo esc_html__('Multisite Mode:', 'alt-text-auditor'); ?></strong>
             <?php
             printf(
-                esc_html__('Viewing statistics across %d sites in your network. Each site maintains its own audit data.', 'wp-alttext-auditor'),
+                esc_html__('Viewing statistics across %d sites in your network. Each site maintains its own audit data.', 'alt-text-auditor'),
                 count($sites)
             );
             ?>
         </p>
     </div>
 
-    <h2><?php echo esc_html__('Sites Overview', 'wp-alttext-auditor'); ?></h2>
+    <h2><?php echo esc_html__('Sites Overview', 'alt-text-auditor'); ?></h2>
 
     <table class="wp-list-table widefat fixed striped">
         <thead>
             <tr>
-                <th><?php echo esc_html__('Site', 'wp-alttext-auditor'); ?></th>
-                <th><?php echo esc_html__('URL', 'wp-alttext-auditor'); ?></th>
-                <th><?php echo esc_html__('Total Images', 'wp-alttext-auditor'); ?></th>
-                <th><?php echo esc_html__('Missing Alt-Text', 'wp-alttext-auditor'); ?></th>
-                <th><?php echo esc_html__('Compliance', 'wp-alttext-auditor'); ?></th>
-                <th><?php echo esc_html__('Actions', 'wp-alttext-auditor'); ?></th>
+                <th><?php echo esc_html__('Site', 'alt-text-auditor'); ?></th>
+                <th><?php echo esc_html__('URL', 'alt-text-auditor'); ?></th>
+                <th><?php echo esc_html__('Total Images', 'alt-text-auditor'); ?></th>
+                <th><?php echo esc_html__('Missing Alt-Text', 'alt-text-auditor'); ?></th>
+                <th><?php echo esc_html__('Compliance', 'alt-text-auditor'); ?></th>
+                <th><?php echo esc_html__('Actions', 'alt-text-auditor'); ?></th>
             </tr>
         </thead>
         <tbody>
             <?php
-            require_once WP_ALTTEXT_UPDATER_PLUGIN_DIR . 'includes/class-audit-storage.php';
+            require_once ALTTEXT_AUDITOR_PLUGIN_DIR . 'includes/class-audit-storage.php';
 
             $network_total_images = 0;
             $network_missing_alt = 0;
@@ -104,8 +104,8 @@ $sites = get_sites(array('number' => 1000)); // Get up to 1000 sites
                         <?php endif; ?>
                     </td>
                     <td>
-                        <a href="<?php echo esc_url(get_admin_url($site->blog_id, 'upload.php?page=wp-alttext-auditor-audit')); ?>" class="button">
-                            <?php echo esc_html__('View Dashboard', 'wp-alttext-auditor'); ?>
+                        <a href="<?php echo esc_url(get_admin_url($site->blog_id, 'upload.php?page=alt-text-auditor-audit')); ?>" class="button">
+                            <?php echo esc_html__('View Dashboard', 'alt-text-auditor'); ?>
                         </a>
                     </td>
                 </tr>
@@ -121,7 +121,7 @@ $sites = get_sites(array('number' => 1000)); // Get up to 1000 sites
         </tbody>
         <tfoot>
             <tr style="background-color: #f0f0f1; font-weight: 600;">
-                <td colspan="2"><strong><?php echo esc_html__('Network Totals', 'wp-alttext-auditor'); ?></strong></td>
+                <td colspan="2"><strong><?php echo esc_html__('Network Totals', 'alt-text-auditor'); ?></strong></td>
                 <td><strong><?php echo esc_html($network_total_images); ?></strong></td>
                 <td>
                     <strong style="color: <?php echo $network_missing_alt > 0 ? '#d63638' : '#00a32a'; ?>;">
@@ -139,14 +139,14 @@ $sites = get_sites(array('number' => 1000)); // Get up to 1000 sites
     </table>
 
     <div class="card" style="max-width: 800px; margin-top: 20px;">
-        <h2><?php echo esc_html__('About Network-Wide Auditing', 'wp-alttext-auditor'); ?></h2>
+        <h2><?php echo esc_html__('About Network-Wide Auditing', 'alt-text-auditor'); ?></h2>
         <p>
-            <?php echo esc_html__('Each site in your network maintains its own audit database and settings. Network admins can view statistics across all sites from this dashboard.', 'wp-alttext-auditor'); ?>
+            <?php echo esc_html__('Each site in your network maintains its own audit database and settings. Network admins can view statistics across all sites from this dashboard.', 'alt-text-auditor'); ?>
         </p>
         <ul>
-            <li><?php echo esc_html__('Site administrators can run scans and manage alt-text on their individual sites', 'wp-alttext-auditor'); ?></li>
-            <li><?php echo esc_html__('Network statistics are calculated in real-time from each site\'s audit database', 'wp-alttext-auditor'); ?></li>
-            <li><?php echo esc_html__('Visit individual site dashboards to perform scans and fix missing alt-text', 'wp-alttext-auditor'); ?></li>
+            <li><?php echo esc_html__('Site administrators can run scans and manage alt-text on their individual sites', 'alt-text-auditor'); ?></li>
+            <li><?php echo esc_html__('Network statistics are calculated in real-time from each site\'s audit database', 'alt-text-auditor'); ?></li>
+            <li><?php echo esc_html__('Visit individual site dashboards to perform scans and fix missing alt-text', 'alt-text-auditor'); ?></li>
         </ul>
     </div>
 </div>

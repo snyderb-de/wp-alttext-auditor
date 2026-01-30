@@ -30,7 +30,7 @@ class WP_AltText_User_Attribution {
      */
     public function __construct($storage = null) {
         if ($storage === null) {
-            require_once WP_ALTTEXT_UPDATER_PLUGIN_DIR . 'includes/class-audit-storage.php';
+            require_once ALTTEXT_AUDITOR_PLUGIN_DIR . 'includes/class-audit-storage.php';
             $this->storage = new WP_AltText_Audit_Storage();
         } else {
             $this->storage = $storage;
@@ -270,7 +270,7 @@ class WP_AltText_User_Attribution {
             $role = !empty($roles) ? ucfirst($roles[0]) : 'Unknown';
         } else {
             // Handle deleted users
-            $display_name = sprintf(__('Deleted User (ID: %d)', 'wp-alttext-auditor'), $user_id);
+            $display_name = sprintf(__('Deleted User (ID: %d)', 'alt-text-auditor'), $user_id);
             $user_login = '';
             $user_email = '';
             $role = 'Deleted';
@@ -307,7 +307,7 @@ class WP_AltText_User_Attribution {
             $role = !empty($roles) ? ucfirst($roles[0]) : 'Unknown';
         } else {
             // Handle deleted users
-            $display_name = sprintf(__('Deleted User (ID: %d)', 'wp-alttext-auditor'), $user_id);
+            $display_name = sprintf(__('Deleted User (ID: %d)', 'alt-text-auditor'), $user_id);
             $user_login = '';
             $user_email = '';
             $role = 'Deleted';

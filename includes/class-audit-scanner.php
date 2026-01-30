@@ -30,7 +30,7 @@ class WP_AltText_Audit_Scanner {
      */
     public function __construct($storage = null) {
         if ($storage === null) {
-            require_once WP_ALTTEXT_UPDATER_PLUGIN_DIR . 'includes/class-audit-storage.php';
+            require_once ALTTEXT_AUDITOR_PLUGIN_DIR . 'includes/class-audit-storage.php';
             $this->storage = new WP_AltText_Audit_Storage();
         } else {
             $this->storage = $storage;

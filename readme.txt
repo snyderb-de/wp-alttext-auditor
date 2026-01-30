@@ -1,4 +1,4 @@
-=== WP Alt Text Auditor ===
+=== Alt Text Auditor ===
 Contributors: thestrangeloop
 Tags: alt-text, accessibility, media, wcag, multisite
 Requires at least: 5.0
@@ -12,7 +12,7 @@ Comprehensive WordPress plugin for managing and auditing alt-text across your en
 
 == Description ==
 
-WP Alt Text Auditor helps you identify and fix images with missing alt-text across your entire WordPress site. Improve accessibility compliance and SEO with powerful scanning, auditing, and inline editing features. Works perfectly on both single-site and WordPress Multisite (Network) installations.
+Alt Text Auditor helps you identify and fix images with missing alt-text across your entire WordPress site. Improve accessibility compliance and SEO with powerful scanning, auditing, and inline editing features. Works perfectly on both single-site and WordPress Multisite (Network) installations.
 
 **Key Features:**
 

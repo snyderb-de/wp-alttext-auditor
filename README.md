@@ -1,4 +1,4 @@
-# WP Alt Text Auditor
+# Alt Text Auditor
 
 [![Built with Claude Code](https://img.shields.io/badge/Built_with-Claude_Code_&_Vibed-8A63D2?style=flat&logo=anthropic&logoColor=white)](https://claude.ai/code)
 

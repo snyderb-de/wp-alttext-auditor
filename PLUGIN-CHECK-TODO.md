@@ -1,6 +1,6 @@
 # Plugin Check TODO - WordPress.org Submission
 
-**Plugin**: WP Alt Text Auditor v1.3.2
+**Plugin**: Alt Text Auditor v1.3.2
 **Analysis Date**: January 30, 2026
 **Status**: Pre-submission review
 
