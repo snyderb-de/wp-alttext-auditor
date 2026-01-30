@@ -3,7 +3,7 @@
  * Plugin Name: WP Alt Text Auditor
  * Plugin URI: https://github.com/snyderb-de/wp-alttext-auditor
  * Description: A comprehensive WordPress plugin for managing and auditing alt-text across your entire site with inline editing and powerful audit dashboard.
- * Version: 1.1.9
+ * Version: 1.2.0
  * Author: Bryan Snyder (snyderb-de@gmail.com)
  * License: GPL v2 or later
  * Text Domain: wp-alttext-auditor
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('WP_ALTTEXT_UPDATER_VERSION', '1.1.9');
+define('WP_ALTTEXT_UPDATER_VERSION', '1.2.0');
 define('WP_ALTTEXT_UPDATER_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('WP_ALTTEXT_UPDATER_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -708,6 +708,66 @@ class WP_AltText_Updater {
             error_log("WP Alt Text Auditor: Result {$result_id} has no attachment_id");
         }
 
+        // If this is a post_content type, update the HTML in the post content
+        $saved_to_post_content = false;
+        if ($result->content_type === 'post_content' && $result->content_id) {
+            $post = get_post($result->content_id);
+
+            if ($post && !empty($post->post_content)) {
+                // Parse the post content HTML
+                libxml_use_internal_errors(true);
+                $dom = new DOMDocument();
+                $dom->loadHTML(mb_convert_encoding($post->post_content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+
+                $img_tags = $dom->getElementsByTagName('img');
+                $found_and_updated = false;
+
+                // Find the matching img tag by src
+                foreach ($img_tags as $img) {
+                    $src = $img->getAttribute('src');
+
+                    // Match by full URL or by filename
+                    if ($src === $result->image_source ||
+                        basename(parse_url($src, PHP_URL_PATH)) === basename(parse_url($result->image_source, PHP_URL_PATH))) {
+
+                        // Update the alt attribute
+                        $img->setAttribute('alt', $alt_text);
+                        $found_and_updated = true;
+                        error_log("WP Alt Text Auditor: Found and updated img tag in post {$result->content_id} with src: {$src}");
+                        break;
+                    }
+                }
+
+                if ($found_and_updated) {
+                    // Save the updated HTML back to the post
+                    $updated_html = $dom->saveHTML();
+
+                    // Remove the HTML wrapper tags that DOMDocument adds
+                    $updated_html = preg_replace('/^<!DOCTYPE.+?>/', '', $updated_html);
+                    $updated_html = str_replace(['<html>', '</html>', '<body>', '</body>'], '', $updated_html);
+                    $updated_html = trim($updated_html);
+
+                    $post_update_result = wp_update_post(array(
+                        'ID' => $result->content_id,
+                        'post_content' => $updated_html
+                    ), true);
+
+                    if (!is_wp_error($post_update_result)) {
+                        $saved_to_post_content = true;
+                        error_log("WP Alt Text Auditor: Successfully updated post content for post {$result->content_id}");
+                    } else {
+                        error_log("WP Alt Text Auditor: Failed to update post content: " . $post_update_result->get_error_message());
+                    }
+                } else {
+                    error_log("WP Alt Text Auditor: Could not find matching img tag in post {$result->content_id} for src: {$result->image_source}");
+                }
+
+                libxml_clear_errors();
+            } else {
+                error_log("WP Alt Text Auditor: Post {$result->content_id} not found or has no content");
+            }
+        }
+
         // Update the audit record
         $updated = $wpdb->update(
             $table_name,
@@ -729,7 +789,9 @@ class WP_AltText_Updater {
                 'message' => __('Alt-text saved successfully.', 'wp-alttext-updater'),
                 'updated' => $updated,
                 'saved_to_media' => $saved_to_media,
-                'attachment_id' => $result->attachment_id
+                'saved_to_post_content' => $saved_to_post_content,
+                'attachment_id' => $result->attachment_id,
+                'content_type' => $result->content_type
             ));
         } else {
             wp_send_json_error(array(

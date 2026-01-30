@@ -132,12 +132,18 @@ wp-alttext-auditor/
 │   ├── class-audit-storage.php         # Database operations & statistics
 │   └── class-user-attribution.php      # User attribution & aggregation
 ├── assets/
+│   ├── icon-128x128.png                # WordPress.org plugin icon (128x128)
+│   ├── icon-256x256.png                # WordPress.org plugin icon (256x256)
+│   ├── banner-772x250.png              # WordPress.org plugin banner
+│   ├── banner-1544x500.png             # WordPress.org plugin banner (retina)
 │   ├── css/
 │   │   ├── admin.css                   # Media library inline edit styles
 │   │   └── audit-dashboard.css         # Audit dashboard styles
-│   └── js/
-│       ├── admin.js                    # Media library auto-save
-│       └── audit-dashboard.js          # Audit dashboard interactions
+│   ├── js/
+│   │   ├── admin.js                    # Media library auto-save
+│   │   └── audit-dashboard.js          # Audit dashboard interactions
+│   └── images/
+│       └── README.md                   # Images directory placeholder
 └── README.md                           # This file
 ```
 
@@ -226,6 +232,29 @@ GPL v2 or later
 For support, please create an issue in the plugin repository or contact the plugin author.
 
 ## Changelog
+
+### 1.2.0 (Major Feature: Post Content HTML Updates)
+
+#### Fixed Images Reappearing After Save
+
+- **FIXED:** Images from published content no longer reappear after saving alt-text
+- **NEW:** Alt-text updates now modify the actual `<img>` tags in post content HTML
+- Previously only updated media library metadata, which didn't affect hardcoded HTML
+- Now updates BOTH media library meta AND post content HTML when saving
+- Uses DOMDocument to safely parse and update HTML without breaking markup
+- Properly handles URL matching (full URL and filename-based matching)
+- Added comprehensive error logging for debugging HTML updates
+- This is a MINOR version bump (1.1.x → 1.2.0) because it adds significant new functionality
+
+**Technical Details:**
+- When `content_type === 'post_content'`, the save handler now:
+  1. Fetches the post by `content_id`
+  2. Parses `post_content` HTML with DOMDocument
+  3. Finds the matching `<img>` tag by `src` attribute
+  4. Updates or adds the `alt` attribute
+  5. Saves the modified HTML back to the post
+- Media library images continue to use the existing meta update approach
+- Both update types are logged separately for debugging
 
 ### 1.1.9 (Critical Bug Fix)
 
