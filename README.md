@@ -53,6 +53,12 @@ A comprehensive WordPress plugin for managing and auditing alt-text across your 
 - **Security**: Proper nonces, capability checks, and input sanitization
 - **Professional UI**: WordPress admin styling with smooth animations
 
+## Requirements
+
+- **WordPress**: 5.0 or higher
+- **PHP**: 7.4 or higher
+- **Environment**: Single-site WordPress installations (multisite support coming in future release)
+
 ## Installation
 
 1. Upload the plugin files to `/wp-content/plugins/wp-alttext-auditor/`
@@ -198,11 +204,12 @@ The plugin creates a custom table `wp_alttext_audit_results` to store scan resul
 
 ### Compatibility
 
-- WordPress 5.0+
-- PHP 7.4+
-- Responsive design for all device sizes (1200px, 960px, 782px, 600px breakpoints)
-- Works with existing media library pagination and filtering
-- Compatible with Classic Editor and Gutenberg blocks
+- **WordPress**: 5.0 or higher
+- **PHP**: 7.4 or higher
+- **Multisite**: Single-site installations only (multisite support planned for future release)
+- **Responsive Design**: Works on all device sizes (1200px, 960px, 782px, 600px breakpoints)
+- **Editors**: Compatible with Classic Editor and Gutenberg blocks
+- **Media Library**: Works with existing pagination and filtering
 
 ## Integration Details
 
