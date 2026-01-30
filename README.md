@@ -2,7 +2,7 @@
 
 [![Built with Claude Code](https://img.shields.io/badge/Built_with-Claude_Code_&_Vibed-8A63D2?style=flat&logo=anthropic&logoColor=white)](https://claude.ai/code)
 
-A comprehensive WordPress plugin for managing and auditing alt-text across your entire site. Features inline editing in the Media Library plus a powerful audit dashboard for site-wide accessibility compliance.
+A comprehensive WordPress plugin for managing and auditing alt-text across your entire site with inline editing and powerful audit dashboard. Supports both single-site and multisite installations.
 
 ## Features
 
