@@ -1,18 +1,18 @@
 === WP Alt Text Auditor ===
 Contributors: thestrangeloop
-Tags: alt-text, accessibility, media, images, wcag, seo
+Tags: alt-text, accessibility, media, images, wcag, seo, multisite
 Requires at least: 5.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.1.9
+Stable tag: 1.3.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Comprehensive WordPress plugin for managing and auditing alt-text across your entire site with inline editing and powerful audit dashboard.
+Comprehensive WordPress plugin for managing and auditing alt-text across your entire site with inline editing, powerful audit dashboard, and full multisite support.
 
 == Description ==
 
-WP Alt Text Updater helps you identify and fix images with missing alt-text across your entire WordPress site. Improve accessibility compliance and SEO with powerful scanning, auditing, and inline editing features.
+WP Alt Text Auditor helps you identify and fix images with missing alt-text across your entire WordPress site. Improve accessibility compliance and SEO with powerful scanning, auditing, and inline editing features. Works perfectly on both single-site and WordPress Multisite (Network) installations.
 
 **Key Features:**
 
@@ -23,15 +23,26 @@ WP Alt Text Updater helps you identify and fix images with missing alt-text acro
 * **Advanced Filtering** - Filter results by user, content source, post type, or search by filename
 * **Quick-Edit Functionality** - Add alt-text inline from audit results
 * **CSV Export** - Export filtered results for offline analysis and reporting
-* **Automatic Daily Scanning** - Optional background scanning via WP Cron
+* **Automatic Daily Scanning** - Optional background scanning via WP Cron with configurable batch sizes
+* **Full Multisite Support** - Network admin dashboard, per-site tables, and network-wide scanning
 * **Performance Optimized** - Chunked scanning prevents timeouts on large sites
 
 == Installation ==
+
+**Single-Site Installation:**
 
 1. Upload the `wp-alttext-auditor` folder to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Navigate to **Media > Alt-Text Audit** to run your first scan
 4. Use **Media > Library** for quick inline editing in the media library
+
+**Multisite (Network) Installation:**
+
+1. Upload the `wp-alttext-auditor` folder to the `/wp-content/plugins/` directory
+2. **Network Activate** the plugin through the 'Network Admin > Plugins' menu
+3. Database tables will be automatically created for all sites in the network
+4. Network admins can view network-wide statistics at **Network Admin > Alt-Text Audit**
+5. Site admins can manage their site's alt-text at **Media > Alt-Text Audit** on each site
 
 == Frequently Asked Questions ==
 
@@ -55,6 +66,11 @@ Yes! All text is internationalized and ready for translation. The text domain is
 
 * **Media Library editing**: Requires `upload_files` capability
 * **Audit Dashboard**: Requires `manage_options` capability (admin only)
+* **Network Admin Dashboard** (multisite): Requires `manage_network_options` capability
+
+= Does this work on WordPress Multisite? =
+
+Yes! The plugin has full multisite support with network activation, per-site database tables, network admin dashboard, and network-wide automatic scanning. Network admins can view statistics across all sites, while site admins manage their own alt-text independently.
 
 == Screenshots ==
 
@@ -66,6 +82,53 @@ Yes! All text is internationalized and ready for translation. The text domain is
 6. CSV export with all filtered results
 
 == Changelog ==
+
+= 1.3.2 =
+*Release Date: January 30th, 2026*
+
+**Multisite Network-Wide Cron Scanning**
+
+* NEW: Network-wide automatic scanning with configurable batch sizes (10/25/50/100 sites per day)
+* NEW: Rotation system scans different sites each day to prevent server overload
+* NEW: Performance warnings and cycle time calculator in network settings
+* NEW: Single-site and multisite cron implementations with independent controls
+* FIXED: Duplicate constant definition warning (added conditional checks)
+* IMPROVED: Enhanced filename collision prevention with two-strategy matching (exact path, then filename)
+* Network admins can now schedule automatic scans across large multisite networks safely
+
+= 1.3.1 =
+*Release Date: January 29th, 2026*
+
+**Security Hardening - CRITICAL SECURITY UPDATE**
+
+* FIXED: Unauthorized post content modification vulnerability (added edit_post capability check)
+* FIXED: Stored XSS vulnerability via alt-text injection (added esc_attr() escaping)
+* FIXED: Missing alt-text length validation (255 character limit enforced)
+* FIXED: Multisite capability check bypass (re-verify after switch_to_blog())
+* Comprehensive security audit completed for v1.3.0 multisite features
+* All critical and high-priority vulnerabilities patched
+* See SECURITY-AUDIT-V1.3.md for complete audit report
+
+**IMPORTANT:** If using v1.2.0 or v1.3.0, update immediately to patch critical security vulnerabilities.
+
+= 1.3.0 =
+*Release Date: January 29th, 2026*
+
+**Full WordPress Multisite (Network) Support**
+
+* NEW: Complete multisite compatibility - works on both single-site and network installations
+* NEW: Network activation creates audit tables for all sites automatically
+* NEW: Network admin dashboard shows aggregated statistics across all sites
+* NEW: Network settings page for multisite configuration
+* NEW: Auto-activation option for newly created sites in network
+* NEW: Per-site database tables - each site maintains its own audit data
+* NEW: Per-site settings and scan schedules - site admins have full control
+* NEW: Network-wide compliance overview with color-coded statistics
+* NEW: Direct links from network dashboard to individual site dashboards
+* Added Network: true to plugin header for WordPress.org compatibility
+* Site switching implemented for cross-site operations
+* Network capability checks (manage_network_options)
+* Compatible with large networks (tested with 1000+ sites)
 
 = 1.1.9 =
 *Release Date: January 29th, 2026*
@@ -240,6 +303,15 @@ Yes! All text is internationalized and ready for translation. The text domain is
 
 == Upgrade Notice ==
 
+= 1.3.2 =
+Adds network-wide automatic scanning for multisite with configurable batch sizes. Fixes duplicate constant warning. Improved filename collision prevention.
+
+= 1.3.1 =
+CRITICAL SECURITY UPDATE: Patches unauthorized post modification and XSS vulnerabilities. All users should upgrade immediately.
+
+= 1.3.0 =
+Major update: Full WordPress Multisite support with network admin dashboard, per-site tables, and network-wide scanning capabilities.
+
 = 1.0.4 =
 New feature: HTML reports automatically generated for each scan with beautiful statistics, images, and user attribution.
 
@@ -282,7 +354,12 @@ Initial release of WP Alt Text Updater with comprehensive alt-text management an
 * PHP 7.4+
 * Works with Classic Editor and Gutenberg blocks
 * Mobile responsive (1200px, 960px, 782px, 600px breakpoints)
-* Compatible with multisite installations
+* Full WordPress Multisite (Network) support
+  - Per-site database tables and settings
+  - Network admin dashboard for network-wide statistics
+  - Network activation creates tables for all sites
+  - Auto-activation for new sites
+  - Network-wide automatic scanning with configurable batch sizes
 
 **Support:**
 

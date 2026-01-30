@@ -18,9 +18,15 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('WP_ALTTEXT_UPDATER_VERSION', '1.3.2');
-define('WP_ALTTEXT_UPDATER_PLUGIN_DIR', plugin_dir_path(__FILE__));
-define('WP_ALTTEXT_UPDATER_PLUGIN_URL', plugin_dir_url(__FILE__));
+if (!defined('WP_ALTTEXT_UPDATER_VERSION')) {
+    define('WP_ALTTEXT_UPDATER_VERSION', '1.3.2');
+}
+if (!defined('WP_ALTTEXT_UPDATER_PLUGIN_DIR')) {
+    define('WP_ALTTEXT_UPDATER_PLUGIN_DIR', plugin_dir_path(__FILE__));
+}
+if (!defined('WP_ALTTEXT_UPDATER_PLUGIN_URL')) {
+    define('WP_ALTTEXT_UPDATER_PLUGIN_URL', plugin_dir_url(__FILE__));
+}
 
 // Main plugin class
 class WP_AltText_Updater {
