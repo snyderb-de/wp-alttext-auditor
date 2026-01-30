@@ -2,13 +2,14 @@
 /**
  * Plugin Name: WP Alt Text Auditor
  * Plugin URI: https://github.com/snyderb-de/wp-alttext-auditor
- * Description: A comprehensive WordPress plugin for managing and auditing alt-text across your entire site with inline editing and powerful audit dashboard.
- * Version: 1.2.0
+ * Description: A comprehensive WordPress plugin for managing and auditing alt-text across your entire site with inline editing and powerful audit dashboard. Supports both single-site and multisite installations.
+ * Version: 1.3.0
  * Requires at least: 5.0
  * Requires PHP: 7.4
  * Author: Bryan Snyder (snyderb-de@gmail.com)
  * License: GPL v2 or later
  * Text Domain: wp-alttext-auditor
+ * Network: true
  */
 
 // Prevent direct access
@@ -17,7 +18,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('WP_ALTTEXT_UPDATER_VERSION', '1.2.0');
+define('WP_ALTTEXT_UPDATER_VERSION', '1.3.0');
 define('WP_ALTTEXT_UPDATER_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('WP_ALTTEXT_UPDATER_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -35,6 +36,12 @@ class WP_AltText_Updater {
         // Initialize admin functionality
         if (is_admin()) {
             add_action('admin_menu', array($this, 'add_admin_menu'));
+
+            // Add network admin menu if multisite
+            if (is_multisite()) {
+                add_action('network_admin_menu', array($this, 'add_network_admin_menu'));
+            }
+
             add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
             add_action('wp_ajax_update_alt_text', array($this, 'ajax_update_alt_text'));
             add_action('wp_ajax_alttext_audit_scan', array($this, 'ajax_audit_scan'));
@@ -119,6 +126,30 @@ class WP_AltText_Updater {
     }
 
     /**
+     * Add network admin menu for multisite
+     */
+    public function add_network_admin_menu() {
+        add_menu_page(
+            __('Network Alt-Text Audit', 'wp-alttext-auditor'),
+            __('Alt-Text Audit', 'wp-alttext-auditor'),
+            'manage_network_options',
+            'wp-alttext-auditor-network',
+            array($this, 'render_network_dashboard'),
+            'dashicons-images-alt2',
+            30
+        );
+
+        add_submenu_page(
+            'wp-alttext-auditor-network',
+            __('Network Settings', 'wp-alttext-auditor'),
+            __('Settings', 'wp-alttext-auditor'),
+            'manage_network_options',
+            'wp-alttext-auditor-network-settings',
+            array($this, 'render_network_settings')
+        );
+    }
+
+    /**
      * Render the admin page
      */
     public function render_admin_page() {
@@ -145,6 +176,30 @@ class WP_AltText_Updater {
 
         $dashboard = new WP_AltText_Audit_Dashboard();
         $dashboard->render_dashboard();
+    }
+
+    /**
+     * Render the network-wide audit dashboard for multisite
+     */
+    public function render_network_dashboard() {
+        if (!current_user_can('manage_network_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.'));
+        }
+
+        // Load network dashboard template
+        require_once WP_ALTTEXT_UPDATER_PLUGIN_DIR . 'includes/network-dashboard-page.php';
+    }
+
+    /**
+     * Render the network settings page for multisite
+     */
+    public function render_network_settings() {
+        if (!current_user_can('manage_network_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.'));
+        }
+
+        // Load network settings template
+        require_once WP_ALTTEXT_UPDATER_PLUGIN_DIR . 'includes/network-settings-page.php';
     }
 
     /**
@@ -1267,11 +1322,35 @@ class WP_AltText_Updater {
 
     /**
      * Plugin activation hook
+     *
+     * @param bool $network_wide Whether the plugin is being network-activated
      */
-    public static function activate() {
+    public static function activate($network_wide = false) {
         // Load storage class if needed for table creation
         require_once WP_ALTTEXT_UPDATER_PLUGIN_DIR . 'includes/class-audit-storage.php';
 
+        if (is_multisite() && $network_wide) {
+            // Network activation - create tables for all sites
+            global $wpdb;
+
+            // Get all blog IDs
+            $blog_ids = $wpdb->get_col("SELECT blog_id FROM $wpdb->blogs");
+
+            foreach ($blog_ids as $blog_id) {
+                switch_to_blog($blog_id);
+                self::activate_single_site();
+                restore_current_blog();
+            }
+        } else {
+            // Single site activation
+            self::activate_single_site();
+        }
+    }
+
+    /**
+     * Activate plugin for a single site
+     */
+    private static function activate_single_site() {
         if (class_exists('WP_AltText_Audit_Storage')) {
             $storage = new WP_AltText_Audit_Storage();
             $storage->create_tables();
@@ -1284,8 +1363,31 @@ class WP_AltText_Updater {
 
     /**
      * Plugin deactivation hook
+     *
+     * @param bool $network_wide Whether the plugin is being network-deactivated
      */
-    public static function deactivate() {
+    public static function deactivate($network_wide = false) {
+        if (is_multisite() && $network_wide) {
+            // Network deactivation - clear for all sites
+            global $wpdb;
+
+            $blog_ids = $wpdb->get_col("SELECT blog_id FROM $wpdb->blogs");
+
+            foreach ($blog_ids as $blog_id) {
+                switch_to_blog($blog_id);
+                self::deactivate_single_site();
+                restore_current_blog();
+            }
+        } else {
+            // Single site deactivation
+            self::deactivate_single_site();
+        }
+    }
+
+    /**
+     * Deactivate plugin for a single site
+     */
+    private static function deactivate_single_site() {
         // Clear scheduled cron events
         wp_clear_scheduled_hook('alttext_audit_cron_scan');
 
@@ -1293,11 +1395,27 @@ class WP_AltText_Updater {
         delete_transient('alttext_audit_stats_cache');
         delete_transient('alttext_audit_scan_progress');
     }
+
+    /**
+     * Handle new site creation in multisite
+     *
+     * @param int $blog_id Blog ID of the new site
+     */
+    public static function on_new_blog($blog_id) {
+        if (is_plugin_active_for_network(plugin_basename(__FILE__))) {
+            switch_to_blog($blog_id);
+            self::activate_single_site();
+            restore_current_blog();
+        }
+    }
 }
 
 // Register activation and deactivation hooks
 register_activation_hook(__FILE__, array('WP_AltText_Updater', 'activate'));
 register_deactivation_hook(__FILE__, array('WP_AltText_Updater', 'deactivate'));
+
+// Handle new sites in multisite
+add_action('wpmu_new_blog', array('WP_AltText_Updater', 'on_new_blog'));
 
 // Initialize the plugin
 new WP_AltText_Updater();
