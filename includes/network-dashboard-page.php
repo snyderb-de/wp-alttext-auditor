@@ -57,6 +57,12 @@ $sites = get_sites(array('number' => 1000)); // Get up to 1000 sites
             foreach ($sites as $site) {
                 switch_to_blog($site->blog_id);
 
+                // SECURITY: Re-verify capability in switched blog context
+                if (!current_user_can('manage_options')) {
+                    restore_current_blog();
+                    continue;
+                }
+
                 $storage = new WP_AltText_Audit_Storage();
                 $stats = $storage->get_statistics();
 

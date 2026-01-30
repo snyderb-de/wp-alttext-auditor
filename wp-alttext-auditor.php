@@ -3,7 +3,7 @@
  * Plugin Name: WP Alt Text Auditor
  * Plugin URI: https://github.com/snyderb-de/wp-alttext-auditor
  * Description: A comprehensive WordPress plugin for managing and auditing alt-text across your entire site with inline editing and powerful audit dashboard. Supports both single-site and multisite installations.
- * Version: 1.3.0
+ * Version: 1.3.1
  * Requires at least: 5.0
  * Requires PHP: 7.4
  * Author: Bryan Snyder (snyderb-de@gmail.com)
@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('WP_ALTTEXT_UPDATER_VERSION', '1.3.0');
+define('WP_ALTTEXT_UPDATER_VERSION', '1.3.1');
 define('WP_ALTTEXT_UPDATER_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('WP_ALTTEXT_UPDATER_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -731,6 +731,13 @@ class WP_AltText_Updater {
             ));
         }
 
+        // Validate alt-text length (WordPress standard is 255 characters)
+        if (strlen($alt_text) > 255) {
+            wp_send_json_error(array(
+                'message' => __('Alt-text must be 255 characters or less.', 'wp-alttext-auditor')
+            ));
+        }
+
         // Load storage class
         require_once WP_ALTTEXT_UPDATER_PLUGIN_DIR . 'includes/class-audit-storage.php';
         $storage = new WP_AltText_Audit_Storage();
@@ -770,6 +777,19 @@ class WP_AltText_Updater {
         if ($result->content_type === 'post_content' && $result->content_id) {
             $post = get_post($result->content_id);
 
+            if (!$post) {
+                wp_send_json_error(array(
+                    'message' => __('Post not found.', 'wp-alttext-auditor')
+                ));
+            }
+
+            // SECURITY: Check if user has permission to edit this specific post
+            if (!current_user_can('edit_post', $result->content_id)) {
+                wp_send_json_error(array(
+                    'message' => __('You do not have permission to edit this post.', 'wp-alttext-auditor')
+                ));
+            }
+
             if ($post && !empty($post->post_content)) {
                 // Parse the post content HTML
                 libxml_use_internal_errors(true);
@@ -787,8 +807,12 @@ class WP_AltText_Updater {
                     if ($src === $result->image_source ||
                         basename(parse_url($src, PHP_URL_PATH)) === basename(parse_url($result->image_source, PHP_URL_PATH))) {
 
+                        // SECURITY: Escape alt-text to prevent HTML injection
+                        // DOMDocument will handle the HTML entities properly
+                        $safe_alt_text = esc_attr($alt_text);
+
                         // Update the alt attribute
-                        $img->setAttribute('alt', $alt_text);
+                        $img->setAttribute('alt', $safe_alt_text);
                         $found_and_updated = true;
                         error_log("WP Alt Text Auditor: Found and updated img tag in post {$result->content_id} with src: {$src}");
                         break;

@@ -280,6 +280,43 @@ For support, please create an issue in the plugin repository or contact the plug
 
 ## Changelog
 
+### 1.3.1 (Security Hardening - CRITICAL)
+
+#### Critical Security Fixes
+
+- **FIXED:** Unauthorized post content modification vulnerability
+  - Added `edit_post` capability check before allowing HTML modification
+  - Users can now only edit alt-text in posts they have permission to edit
+  - Prevents contributors/editors from modifying admin or other users' posts
+  - **CVE Risk**: Privilege escalation / unauthorized content modification
+
+- **FIXED:** Stored XSS vulnerability via alt-text injection
+  - Alt-text now properly escaped with `esc_attr()` before insertion into HTML
+  - Prevents malicious scripts from being injected via alt-text field
+  - HTML entities are safely handled by DOMDocument
+  - **CVE Risk**: Stored Cross-Site Scripting (XSS)
+
+#### High Priority Security Fixes
+
+- **FIXED:** Missing alt-text length validation
+  - Alt-text now limited to 255 characters (WordPress standard)
+  - Prevents database overflow and potential page rendering issues
+  - Clear error message shown to users exceeding limit
+
+- **FIXED:** Multisite capability check bypass
+  - Added capability re-verification after `switch_to_blog()` in network dashboard
+  - Prevents unauthorized access to site data in multisite networks
+  - Each site's data is now properly protected by capability checks
+
+#### Security Audit
+
+- Comprehensive security audit completed for v1.3.0 features
+- All critical and high-priority issues identified and fixed
+- See `SECURITY-AUDIT-V1.3.md` for complete audit report
+- No SQL injection, CSRF, or other major vulnerabilities found
+
+**IMPORTANT**: If you are using v1.2.0 or v1.3.0, update to v1.3.1 immediately to patch critical security vulnerabilities.
+
 ### 1.3.0 (Multisite Support)
 
 #### Full WordPress Multisite (Network) Support
