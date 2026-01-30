@@ -100,21 +100,12 @@ class WP_AltText_Audit_Scanner {
         $percentage = $total > 0 ? round(($processed / $total) * 100) : 100;
         $continue = $processed < $total;
 
-        // Get last processed item name for progress display
-        $last_item = '';
-        if ($query->post_count > 0) {
-            $posts = $query->posts;
-            $last_post = end($posts);
-            $last_item = $last_post->post_title ? $last_post->post_title : '(Untitled)';
-        }
-
         return array(
             'processed' => $processed,
             'total' => $total,
             'percentage' => $percentage,
             'continue' => $continue,
-            'results_count' => count($results),
-            'last_item' => $last_item
+            'results_count' => count($results)
         );
     }
 
@@ -181,21 +172,12 @@ class WP_AltText_Audit_Scanner {
         $percentage = $total > 0 ? round(($processed / $total) * 100) : 100;
         $continue = $processed < $total;
 
-        // Get last processed item name for progress display
-        $last_item = '';
-        if ($query->post_count > 0) {
-            $posts = $query->posts;
-            $last_post = end($posts);
-            $last_item = $last_post->post_title ? $last_post->post_title : '(Untitled)';
-        }
-
         return array(
             'processed' => $processed,
             'total' => $total,
             'percentage' => $percentage,
             'continue' => $continue,
-            'results_count' => count($results),
-            'last_item' => $last_item
+            'results_count' => count($results)
         );
     }
 
@@ -265,21 +247,12 @@ class WP_AltText_Audit_Scanner {
         $percentage = $total > 0 ? round(($processed / $total) * 100) : 100;
         $continue = $processed < $total;
 
-        // Get last processed item name for progress display
-        $last_item = '';
-        if ($query->post_count > 0) {
-            $posts = $query->posts;
-            $last_post = end($posts);
-            $last_item = $last_post->post_title ? $last_post->post_title : '(Untitled)';
-        }
-
         return array(
             'processed' => $processed,
             'total' => $total,
             'percentage' => $percentage,
             'continue' => $continue,
-            'results_count' => count($results),
-            'last_item' => $last_item
+            'results_count' => count($results)
         );
     }
 
@@ -348,15 +321,40 @@ class WP_AltText_Audit_Scanner {
             return null;
         }
 
-        // Extract filename from URL
+        // Extract path from URL
         $parsed_url = parse_url($image_src);
         if (!isset($parsed_url['path'])) {
             return null;
         }
 
-        $filename = basename($parsed_url['path']);
+        $full_path = $parsed_url['path'];
 
-        // Query attachments by filename in _wp_attached_file meta
+        // Extract the relative path from uploads directory
+        // Look for "uploads/" in the path and get everything after it
+        if (strpos($full_path, '/uploads/') !== false) {
+            $relative_path = substr($full_path, strpos($full_path, '/uploads/') + 9);
+        } else {
+            // Fallback: use the full path basename
+            $relative_path = basename($full_path);
+        }
+
+        // STRATEGY 1: Try exact match on relative path first (most accurate)
+        // This prevents filename collisions (e.g., 2024/01/hero.jpg vs 2025/03/hero.jpg)
+        $attachment_id = $wpdb->get_var($wpdb->prepare(
+            "SELECT post_id FROM {$wpdb->postmeta}
+             WHERE meta_key = '_wp_attached_file'
+             AND meta_value = %s
+             LIMIT 1",
+            $relative_path
+        ));
+
+        if ($attachment_id) {
+            return intval($attachment_id);
+        }
+
+        // STRATEGY 2: Fallback to filename-based LIKE match (less accurate but broader)
+        // Only use if exact match fails (e.g., for resized images or URL variations)
+        $filename = basename($full_path);
         $attachment_id = $wpdb->get_var($wpdb->prepare(
             "SELECT post_id FROM {$wpdb->postmeta}
              WHERE meta_key = '_wp_attached_file'
