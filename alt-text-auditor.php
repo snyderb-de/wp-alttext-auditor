@@ -893,7 +893,15 @@ class WP_AltText_Updater {
 
         // Check referrer to prevent direct URL access from external sites
         $referer = wp_get_referer();
-        if (!$referer || strpos($referer, admin_url()) !== 0) {
+        if (!$referer) {
+            wp_die(__('Invalid request. Please export from the audit dashboard.', 'alt-text-auditor'));
+        }
+
+        // Validate referer domain matches site domain
+        $referer_host = wp_parse_url($referer, PHP_URL_HOST);
+        $site_host = wp_parse_url(admin_url(), PHP_URL_HOST);
+
+        if ($referer_host !== $site_host) {
             wp_die(__('Invalid request. Please export from the audit dashboard.', 'alt-text-auditor'));
         }
 
