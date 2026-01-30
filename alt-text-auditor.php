@@ -453,7 +453,7 @@ class WP_AltText_Updater {
         // Localize script for AJAX - use appropriate script handle based on page
         $script_handle = ($hook === 'media_page_alt-text-auditor-audit') ? 'wp-alttext-updater-audit-dashboard' : 'wp-alttext-updater-admin';
 
-        wp_localize_script($script_handle, 'wpAltTextUpdater', array(
+        wp_localize_script($script_handle, 'altTextAuditor', array(
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('alttext_auditor_nonce'),
             'audit_nonce' => wp_create_nonce('alttext_audit_nonce'),
