@@ -4,7 +4,7 @@ Tags: alt-text, accessibility, media, wcag, multisite
 Requires at least: 5.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.3.2
+Stable tag: 2.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -82,6 +82,30 @@ Yes! The plugin has full multisite support with network activation, per-site dat
 6. CSV export with all filtered results
 
 == Changelog ==
+
+= 2.0.0 =
+*Release Date: January 30th, 2026*
+
+**BREAKING CHANGE: Plugin Renamed**
+
+* RENAMED: "WP Alt Text Auditor" → "Alt Text Auditor" (removed "WP" prefix)
+* Plugin slug changed: wp-alttext-auditor → alt-text-auditor
+* Text domain updated: 'wp-alttext-auditor' → 'alt-text-auditor'
+* WordPress.org guideline compliance (trademarked term removal)
+* IMPORTANT: Deactivate old plugin before installing v2.0.0
+* Database tables/options preserved - no data migration needed
+* All functionality preserved and enhanced
+
+**WordPress.org Submission Prep**
+
+* FIXED: Text domain consistency (294 instances corrected)
+* FIXED: Removed debug error_log() calls from production code
+* FIXED: Hidden .DS_Store files removed
+* UPDATED: readme.txt "Tested up to: 6.9"
+* UPDATED: Tags reduced to 5 (removed: images, seo)
+* UPDATED: Moved security audit docs to /docs directory
+* UPDATED: Constants renamed (WP_ALTTEXT_UPDATER_* → ALTTEXT_AUDITOR_*)
+* READY: WordPress.org plugin directory submission
 
 = 1.3.2 =
 *Release Date: January 30th, 2026*

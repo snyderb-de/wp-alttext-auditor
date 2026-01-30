@@ -3,7 +3,7 @@
  * Plugin Name: Alt Text Auditor
  * Plugin URI: https://github.com/snyderb-de/alt-text-auditor
  * Description: A comprehensive WordPress plugin for managing and auditing alt-text across your entire site with inline editing and powerful audit dashboard. Supports both single-site and multisite installations.
- * Version: 1.3.2
+ * Version: 2.0.0
  * Requires at least: 5.0
  * Requires PHP: 7.4
  * Author: Bryan Snyder (snyderb-de@gmail.com)
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
 
 // Define plugin constants
 if (!defined('ALTTEXT_AUDITOR_VERSION')) {
-    define('ALTTEXT_AUDITOR_VERSION', '1.3.2');
+    define('ALTTEXT_AUDITOR_VERSION', '2.0.0');
 }
 if (!defined('ALTTEXT_AUDITOR_PLUGIN_DIR')) {
     define('ALTTEXT_AUDITOR_PLUGIN_DIR', plugin_dir_path(__FILE__));
