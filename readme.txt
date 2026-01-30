@@ -1,8 +1,8 @@
 === WP Alt Text Auditor ===
 Contributors: thestrangeloop
-Tags: alt-text, accessibility, media, images, wcag, seo, multisite
+Tags: alt-text, accessibility, media, wcag, multisite
 Requires at least: 5.0
-Tested up to: 6.7
+Tested up to: 6.9
 Requires PHP: 7.4
 Stable tag: 1.3.2
 License: GPLv2 or later

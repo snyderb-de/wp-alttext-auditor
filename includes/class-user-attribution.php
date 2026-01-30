@@ -270,7 +270,7 @@ class WP_AltText_User_Attribution {
             $role = !empty($roles) ? ucfirst($roles[0]) : 'Unknown';
         } else {
             // Handle deleted users
-            $display_name = sprintf(__('Deleted User (ID: %d)', 'wp-alttext-updater'), $user_id);
+            $display_name = sprintf(__('Deleted User (ID: %d)', 'wp-alttext-auditor'), $user_id);
             $user_login = '';
             $user_email = '';
             $role = 'Deleted';
@@ -307,7 +307,7 @@ class WP_AltText_User_Attribution {
             $role = !empty($roles) ? ucfirst($roles[0]) : 'Unknown';
         } else {
             // Handle deleted users
-            $display_name = sprintf(__('Deleted User (ID: %d)', 'wp-alttext-updater'), $user_id);
+            $display_name = sprintf(__('Deleted User (ID: %d)', 'wp-alttext-auditor'), $user_id);
             $user_login = '';
             $user_email = '';
             $role = 'Deleted';

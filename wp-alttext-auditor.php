@@ -37,7 +37,7 @@ class WP_AltText_Updater {
     
     public function init() {
         // Load plugin text domain
-        load_plugin_textdomain('wp-alttext-updater', false, dirname(plugin_basename(__FILE__)) . '/languages');
+        load_plugin_textdomain('wp-alttext-auditor', false, dirname(plugin_basename(__FILE__)) . '/languages');
 
         // Initialize admin functionality
         if (is_admin()) {
@@ -78,7 +78,7 @@ class WP_AltText_Updater {
         foreach ($columns as $key => $value) {
             $new_columns[$key] = $value;
             if ($key === 'title') {
-                $new_columns['alt_text'] = __('Alt Text', 'wp-alttext-updater');
+                $new_columns['alt_text'] = __('Alt Text', 'wp-alttext-auditor');
             }
         }
         return $new_columns;
@@ -95,7 +95,7 @@ class WP_AltText_Updater {
             // Only show for images
             if (wp_attachment_is_image($attachment_id)) {
                 echo '<div class="alttext-input-wrapper">';
-                echo '<input type="text" class="alttext-input" data-attachment-id="' . esc_attr($attachment_id) . '" value="' . esc_attr($current_alt) . '" placeholder="' . esc_attr__('Enter alt text...', 'wp-alttext-updater') . '" maxlength="255" />';
+                echo '<input type="text" class="alttext-input" data-attachment-id="' . esc_attr($attachment_id) . '" value="' . esc_attr($current_alt) . '" placeholder="' . esc_attr__('Enter alt text...', 'wp-alttext-auditor') . '" maxlength="255" />';
                 echo '<div class="alttext-save-indicator">';
                 echo '<span class="spinner"></span>';
                 echo '<span class="dashicons dashicons-yes-alt success-icon"></span>';
@@ -103,7 +103,7 @@ class WP_AltText_Updater {
                 echo '</div>';
                 echo '</div>';
             } else {
-                echo '<span class="alttext-not-image">' . __('Not an image', 'wp-alttext-updater') . '</span>';
+                echo '<span class="alttext-not-image">' . __('Not an image', 'wp-alttext-auditor') . '</span>';
             }
         }
     }
@@ -217,66 +217,66 @@ class WP_AltText_Updater {
         // Overview tab help
         $screen->add_help_tab(array(
             'id' => 'audit-overview',
-            'title' => __('Overview', 'wp-alttext-updater'),
-            'content' => '<p>' . __('<strong>Alt-Text Audit Dashboard</strong>', 'wp-alttext-updater') . '</p>' .
-                         '<p>' . __('The audit dashboard helps you identify and fix images with missing alt-text across your entire WordPress site.', 'wp-alttext-updater') . '</p>' .
-                         '<p>' . __('<strong>Key Features:</strong>', 'wp-alttext-updater') . '</p>' .
+            'title' => __('Overview', 'wp-alttext-auditor'),
+            'content' => '<p>' . __('<strong>Alt-Text Audit Dashboard</strong>', 'wp-alttext-auditor') . '</p>' .
+                         '<p>' . __('The audit dashboard helps you identify and fix images with missing alt-text across your entire WordPress site.', 'wp-alttext-auditor') . '</p>' .
+                         '<p>' . __('<strong>Key Features:</strong>', 'wp-alttext-auditor') . '</p>' .
                          '<ul>' .
-                         '<li>' . __('Scan published posts and pages for images', 'wp-alttext-updater') . '</li>' .
-                         '<li>' . __('Scan media library for missing alt-text', 'wp-alttext-updater') . '</li>' .
-                         '<li>' . __('View statistics and track progress', 'wp-alttext-updater') . '</li>' .
-                         '<li>' . __('See which users have the most missing alt-text', 'wp-alttext-updater') . '</li>' .
-                         '<li>' . __('Quick-edit alt-text inline', 'wp-alttext-updater') . '</li>' .
-                         '<li>' . __('Export results to CSV', 'wp-alttext-updater') . '</li>' .
+                         '<li>' . __('Scan published posts and pages for images', 'wp-alttext-auditor') . '</li>' .
+                         '<li>' . __('Scan media library for missing alt-text', 'wp-alttext-auditor') . '</li>' .
+                         '<li>' . __('View statistics and track progress', 'wp-alttext-auditor') . '</li>' .
+                         '<li>' . __('See which users have the most missing alt-text', 'wp-alttext-auditor') . '</li>' .
+                         '<li>' . __('Quick-edit alt-text inline', 'wp-alttext-auditor') . '</li>' .
+                         '<li>' . __('Export results to CSV', 'wp-alttext-auditor') . '</li>' .
                          '</ul>'
         ));
 
         // Scanning help
         $screen->add_help_tab(array(
             'id' => 'audit-scanning',
-            'title' => __('Scanning', 'wp-alttext-updater'),
-            'content' => '<p>' . __('<strong>How Scanning Works</strong>', 'wp-alttext-updater') . '</p>' .
-                         '<p>' . __('The scanner processes your content in batches (50 items at a time) to prevent timeouts on large sites.', 'wp-alttext-updater') . '</p>' .
-                         '<p>' . __('<strong>Scan Published Content:</strong> Scans all published posts and pages for embedded images and checks their alt-text attributes.', 'wp-alttext-updater') . '</p>' .
-                         '<p>' . __('<strong>Scan Media Library:</strong> Checks all image attachments in your media library for alt-text meta data.', 'wp-alttext-updater') . '</p>' .
-                         '<p>' . __('<strong>Automatic Scanning:</strong> Enable daily automatic scanning to keep your audit data fresh without manual intervention.', 'wp-alttext-updater') . '</p>' .
-                         '<p>' . __('Results are cached for 24 hours for performance. Use the "Refresh Statistics" button to update immediately.', 'wp-alttext-updater') . '</p>'
+            'title' => __('Scanning', 'wp-alttext-auditor'),
+            'content' => '<p>' . __('<strong>How Scanning Works</strong>', 'wp-alttext-auditor') . '</p>' .
+                         '<p>' . __('The scanner processes your content in batches (50 items at a time) to prevent timeouts on large sites.', 'wp-alttext-auditor') . '</p>' .
+                         '<p>' . __('<strong>Scan Published Content:</strong> Scans all published posts and pages for embedded images and checks their alt-text attributes.', 'wp-alttext-auditor') . '</p>' .
+                         '<p>' . __('<strong>Scan Media Library:</strong> Checks all image attachments in your media library for alt-text meta data.', 'wp-alttext-auditor') . '</p>' .
+                         '<p>' . __('<strong>Automatic Scanning:</strong> Enable daily automatic scanning to keep your audit data fresh without manual intervention.', 'wp-alttext-auditor') . '</p>' .
+                         '<p>' . __('Results are cached for 24 hours for performance. Use the "Refresh Statistics" button to update immediately.', 'wp-alttext-auditor') . '</p>'
         ));
 
         // Filtering help
         $screen->add_help_tab(array(
             'id' => 'audit-filtering',
-            'title' => __('Filtering & Export', 'wp-alttext-updater'),
-            'content' => '<p>' . __('<strong>Filter Results</strong>', 'wp-alttext-updater') . '</p>' .
-                         '<p>' . __('Use the filter form to narrow down results:', 'wp-alttext-updater') . '</p>' .
+            'title' => __('Filtering & Export', 'wp-alttext-auditor'),
+            'content' => '<p>' . __('<strong>Filter Results</strong>', 'wp-alttext-auditor') . '</p>' .
+                         '<p>' . __('Use the filter form to narrow down results:', 'wp-alttext-auditor') . '</p>' .
                          '<ul>' .
-                         '<li>' . __('<strong>User:</strong> Filter by author/uploader', 'wp-alttext-updater') . '</li>' .
-                         '<li>' . __('<strong>Content Source:</strong> Post content vs media library', 'wp-alttext-updater') . '</li>' .
-                         '<li>' . __('<strong>Post Type:</strong> Posts, pages, or custom post types', 'wp-alttext-updater') . '</li>' .
-                         '<li>' . __('<strong>Search:</strong> Search by image filename or existing alt-text', 'wp-alttext-updater') . '</li>' .
+                         '<li>' . __('<strong>User:</strong> Filter by author/uploader', 'wp-alttext-auditor') . '</li>' .
+                         '<li>' . __('<strong>Content Source:</strong> Post content vs media library', 'wp-alttext-auditor') . '</li>' .
+                         '<li>' . __('<strong>Post Type:</strong> Posts, pages, or custom post types', 'wp-alttext-auditor') . '</li>' .
+                         '<li>' . __('<strong>Search:</strong> Search by image filename or existing alt-text', 'wp-alttext-auditor') . '</li>' .
                          '</ul>' .
-                         '<p>' . __('<strong>CSV Export:</strong> Click "Export to CSV" to download all filtered results for offline analysis or reporting. The export respects your current filters.', 'wp-alttext-updater') . '</p>'
+                         '<p>' . __('<strong>CSV Export:</strong> Click "Export to CSV" to download all filtered results for offline analysis or reporting. The export respects your current filters.', 'wp-alttext-auditor') . '</p>'
         ));
 
         // Quick-edit help
         $screen->add_help_tab(array(
             'id' => 'audit-quick-edit',
-            'title' => __('Quick Edit', 'wp-alttext-updater'),
-            'content' => '<p>' . __('<strong>Inline Alt-Text Editing</strong>', 'wp-alttext-updater') . '</p>' .
-                         '<p>' . __('Fix missing alt-text directly from the audit results:', 'wp-alttext-updater') . '</p>' .
+            'title' => __('Quick Edit', 'wp-alttext-auditor'),
+            'content' => '<p>' . __('<strong>Inline Alt-Text Editing</strong>', 'wp-alttext-auditor') . '</p>' .
+                         '<p>' . __('Fix missing alt-text directly from the audit results:', 'wp-alttext-auditor') . '</p>' .
                          '<ol>' .
-                         '<li>' . __('Click the "Add Alt Text" button next to any missing image', 'wp-alttext-updater') . '</li>' .
-                         '<li>' . __('Enter descriptive alt-text in the input field', 'wp-alttext-updater') . '</li>' .
-                         '<li>' . __('Click "Save" to update both WordPress and the audit database', 'wp-alttext-updater') . '</li>' .
+                         '<li>' . __('Click the "Add Alt Text" button next to any missing image', 'wp-alttext-auditor') . '</li>' .
+                         '<li>' . __('Enter descriptive alt-text in the input field', 'wp-alttext-auditor') . '</li>' .
+                         '<li>' . __('Click "Save" to update both WordPress and the audit database', 'wp-alttext-auditor') . '</li>' .
                          '</ol>' .
-                         '<p>' . __('The row will be automatically removed from the table and statistics will update after saving.', 'wp-alttext-updater') . '</p>'
+                         '<p>' . __('The row will be automatically removed from the table and statistics will update after saving.', 'wp-alttext-auditor') . '</p>'
         ));
 
         // Set help sidebar
         $screen->set_help_sidebar(
-            '<p><strong>' . __('For more information:', 'wp-alttext-updater') . '</strong></p>' .
-            '<p><a href="https://www.w3.org/WAI/tutorials/images/" target="_blank">' . __('W3C Alt Text Guide', 'wp-alttext-updater') . '</a></p>' .
-            '<p><a href="https://www.w3.org/TR/WCAG21/" target="_blank">' . __('WCAG 2.1 Guidelines', 'wp-alttext-updater') . '</a></p>'
+            '<p><strong>' . __('For more information:', 'wp-alttext-auditor') . '</strong></p>' .
+            '<p><a href="https://www.w3.org/WAI/tutorials/images/" target="_blank">' . __('W3C Alt Text Guide', 'wp-alttext-auditor') . '</a></p>' .
+            '<p><a href="https://www.w3.org/TR/WCAG21/" target="_blank">' . __('WCAG 2.1 Guidelines', 'wp-alttext-auditor') . '</a></p>'
         );
     }
 
@@ -457,14 +457,14 @@ class WP_AltText_Updater {
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('wp_alttext_updater_nonce'),
             'audit_nonce' => wp_create_nonce('alttext_audit_nonce'),
-            'updating_text' => __('Updating...', 'wp-alttext-updater'),
-            'updated_text' => __('Updated!', 'wp-alttext-updater'),
-            'error_text' => __('Error updating alt text', 'wp-alttext-updater'),
-            'has_alt_text' => __('Has Alt Text', 'wp-alttext-updater'),
-            'missing_alt_text' => __('Missing Alt Text', 'wp-alttext-updater'),
-            'scanning_text' => __('Scanning...', 'wp-alttext-updater'),
-            'scan_complete_text' => __('Scan complete!', 'wp-alttext-updater'),
-            'scan_error_text' => __('Error during scan', 'wp-alttext-updater')
+            'updating_text' => __('Updating...', 'wp-alttext-auditor'),
+            'updated_text' => __('Updated!', 'wp-alttext-auditor'),
+            'error_text' => __('Error updating alt text', 'wp-alttext-auditor'),
+            'has_alt_text' => __('Has Alt Text', 'wp-alttext-auditor'),
+            'missing_alt_text' => __('Missing Alt Text', 'wp-alttext-auditor'),
+            'scanning_text' => __('Scanning...', 'wp-alttext-auditor'),
+            'scan_complete_text' => __('Scan complete!', 'wp-alttext-auditor'),
+            'scan_error_text' => __('Error during scan', 'wp-alttext-auditor')
         ));
     }
     
@@ -478,7 +478,7 @@ class WP_AltText_Updater {
 
         // Check user capabilities
         if (!current_user_can('upload_files')) {
-            wp_send_json_error(array('message' => __('Insufficient permissions', 'wp-alttext-updater')), 403);
+            wp_send_json_error(array('message' => __('Insufficient permissions', 'wp-alttext-auditor')), 403);
         }
         
         $attachment_id = intval($_POST['attachment_id']);
@@ -488,7 +488,7 @@ class WP_AltText_Updater {
         $attachment = get_post($attachment_id);
         if (!$attachment || $attachment->post_type !== 'attachment') {
             wp_send_json_error(array(
-                'message' => __('Invalid attachment', 'wp-alttext-updater')
+                'message' => __('Invalid attachment', 'wp-alttext-auditor')
             ));
         }
         
@@ -497,12 +497,12 @@ class WP_AltText_Updater {
         
         if ($result !== false) {
             wp_send_json_success(array(
-                'message' => __('Alt text updated successfully', 'wp-alttext-updater'),
+                'message' => __('Alt text updated successfully', 'wp-alttext-auditor'),
                 'alt_text' => $alt_text
             ));
         } else {
             wp_send_json_error(array(
-                'message' => __('Failed to update alt text', 'wp-alttext-updater')
+                'message' => __('Failed to update alt text', 'wp-alttext-auditor')
             ));
         }
     }
@@ -520,7 +520,7 @@ class WP_AltText_Updater {
         // Check user capabilities
         if (!current_user_can('manage_options')) {
             wp_send_json_error(array(
-                'message' => __('You do not have permission to perform this action.', 'wp-alttext-updater')
+                'message' => __('You do not have permission to perform this action.', 'wp-alttext-auditor')
             ));
         }
 
@@ -530,7 +530,7 @@ class WP_AltText_Updater {
             delete_transient('alttext_audit_scan_progress');
             delete_transient('alttext_audit_scan_start_time');
             wp_send_json_error(array(
-                'message' => __('Scan cancelled by user.', 'wp-alttext-updater'),
+                'message' => __('Scan cancelled by user.', 'wp-alttext-auditor'),
                 'cancelled' => true
             ));
         }
@@ -547,7 +547,7 @@ class WP_AltText_Updater {
         // Validate scan type
         if (!in_array($scan_type, array('content', 'media', 'drafts'))) {
             wp_send_json_error(array(
-                'message' => __('Invalid scan type.', 'wp-alttext-updater')
+                'message' => __('Invalid scan type.', 'wp-alttext-auditor')
             ));
         }
 
@@ -611,9 +611,9 @@ class WP_AltText_Updater {
                 'report_filename' => $report_file ? basename($report_file) : ''
             ));
 
-            // Log report generation
+            // Report generated successfully
             if ($report_file) {
-                error_log('WP Alt Text Updater: Manual scan completed. Report generated: ' . basename($report_file));
+                // Report file: $report_file
             }
         }
 
@@ -626,9 +626,9 @@ class WP_AltText_Updater {
             'current_batch' => $batch,
             'results_count' => $result['results_count'],
             'scan_type' => $scan_type,
-            'current_item' => !empty($result['last_item']) ? sprintf(__('Scanning: %s', 'wp-alttext-updater'), $result['last_item']) : '',
+            'current_item' => !empty($result['last_item']) ? sprintf(__('Scanning: %s', 'wp-alttext-auditor'), $result['last_item']) : '',
             'message' => sprintf(
-                __('Processed %d of %d items (%d%%)', 'wp-alttext-updater'),
+                __('Processed %d of %d items (%d%%)', 'wp-alttext-auditor'),
                 $result['processed'],
                 $result['total'],
                 $result['percentage']
@@ -648,7 +648,7 @@ class WP_AltText_Updater {
         // Check user capabilities
         if (!current_user_can('manage_options')) {
             wp_send_json_error(array(
-                'message' => __('You do not have permission to perform this action.', 'wp-alttext-updater')
+                'message' => __('You do not have permission to perform this action.', 'wp-alttext-auditor')
             ));
         }
 
@@ -679,7 +679,7 @@ class WP_AltText_Updater {
         // Check user capabilities
         if (!current_user_can('manage_options')) {
             wp_send_json_error(array(
-                'message' => __('You do not have permission to perform this action.', 'wp-alttext-updater')
+                'message' => __('You do not have permission to perform this action.', 'wp-alttext-auditor')
             ));
         }
 
@@ -723,7 +723,7 @@ class WP_AltText_Updater {
         // Check user capabilities
         if (!current_user_can('upload_files')) {
             wp_send_json_error(array(
-                'message' => __('You do not have permission to perform this action.', 'wp-alttext-updater')
+                'message' => __('You do not have permission to perform this action.', 'wp-alttext-auditor')
             ));
         }
 
@@ -733,7 +733,7 @@ class WP_AltText_Updater {
 
         if (!$result_id) {
             wp_send_json_error(array(
-                'message' => __('Invalid result ID.', 'wp-alttext-updater')
+                'message' => __('Invalid result ID.', 'wp-alttext-auditor')
             ));
         }
 
@@ -759,7 +759,7 @@ class WP_AltText_Updater {
 
         if (!$result) {
             wp_send_json_error(array(
-                'message' => __('Result not found.', 'wp-alttext-updater')
+                'message' => __('Result not found.', 'wp-alttext-auditor')
             ));
         }
 
@@ -770,12 +770,7 @@ class WP_AltText_Updater {
             if ($attachment && $attachment->post_type === 'attachment') {
                 update_post_meta($result->attachment_id, '_wp_attachment_image_alt', $alt_text);
                 $saved_to_media = true;
-                error_log("WP Alt Text Auditor: Updated attachment {$result->attachment_id} with alt-text: {$alt_text}");
-            } else {
-                error_log("WP Alt Text Auditor: Attachment {$result->attachment_id} not found or not an attachment");
             }
-        } else {
-            error_log("WP Alt Text Auditor: Result {$result_id} has no attachment_id");
         }
 
         // If this is a post_content type, update the HTML in the post content
@@ -820,7 +815,6 @@ class WP_AltText_Updater {
                         // Update the alt attribute
                         $img->setAttribute('alt', $safe_alt_text);
                         $found_and_updated = true;
-                        error_log("WP Alt Text Auditor: Found and updated img tag in post {$result->content_id} with src: {$src}");
                         break;
                     }
                 }
@@ -841,17 +835,10 @@ class WP_AltText_Updater {
 
                     if (!is_wp_error($post_update_result)) {
                         $saved_to_post_content = true;
-                        error_log("WP Alt Text Auditor: Successfully updated post content for post {$result->content_id}");
-                    } else {
-                        error_log("WP Alt Text Auditor: Failed to update post content: " . $post_update_result->get_error_message());
                     }
-                } else {
-                    error_log("WP Alt Text Auditor: Could not find matching img tag in post {$result->content_id} for src: {$result->image_source}");
                 }
 
                 libxml_clear_errors();
-            } else {
-                error_log("WP Alt Text Auditor: Post {$result->content_id} not found or has no content");
             }
         }
 
@@ -873,7 +860,7 @@ class WP_AltText_Updater {
             delete_transient('alttext_audit_stats_cache');
 
             wp_send_json_success(array(
-                'message' => __('Alt-text saved successfully.', 'wp-alttext-updater'),
+                'message' => __('Alt-text saved successfully.', 'wp-alttext-auditor'),
                 'updated' => $updated,
                 'saved_to_media' => $saved_to_media,
                 'saved_to_post_content' => $saved_to_post_content,
@@ -882,7 +869,7 @@ class WP_AltText_Updater {
             ));
         } else {
             wp_send_json_error(array(
-                'message' => __('Failed to update audit record.', 'wp-alttext-updater')
+                'message' => __('Failed to update audit record.', 'wp-alttext-auditor')
             ));
         }
     }
@@ -896,24 +883,24 @@ class WP_AltText_Updater {
     public function ajax_audit_export() {
         // Verify nonce - use GET parameter since this is a direct download link
         if (!isset($_GET['nonce']) || !wp_verify_nonce($_GET['nonce'], 'alttext_audit_nonce')) {
-            wp_die(__('Security check failed', 'wp-alttext-updater'));
+            wp_die(__('Security check failed', 'wp-alttext-auditor'));
         }
 
         // Check user capabilities
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have permission to perform this action.', 'wp-alttext-updater'));
+            wp_die(__('You do not have permission to perform this action.', 'wp-alttext-auditor'));
         }
 
         // Check referrer to prevent direct URL access from external sites
         $referer = wp_get_referer();
         if (!$referer || strpos($referer, admin_url()) !== 0) {
-            wp_die(__('Invalid request. Please export from the audit dashboard.', 'wp-alttext-updater'));
+            wp_die(__('Invalid request. Please export from the audit dashboard.', 'wp-alttext-auditor'));
         }
 
         // Rate limiting: prevent abuse by limiting exports to once per minute per user
         $rate_limit_key = 'alttext_export_' . get_current_user_id();
         if (get_transient($rate_limit_key)) {
-            wp_die(__('Please wait before exporting again. Exports are limited to once per minute.', 'wp-alttext-updater'));
+            wp_die(__('Please wait before exporting again. Exports are limited to once per minute.', 'wp-alttext-auditor'));
         }
         set_transient($rate_limit_key, 1, 60); // 60 second cooldown
 
@@ -1067,7 +1054,7 @@ class WP_AltText_Updater {
         // Check user capabilities
         if (!current_user_can('manage_options')) {
             wp_send_json_error(array(
-                'message' => __('You do not have permission to perform this action.', 'wp-alttext-updater')
+                'message' => __('You do not have permission to perform this action.', 'wp-alttext-auditor')
             ));
         }
 
@@ -1084,7 +1071,7 @@ class WP_AltText_Updater {
             }
 
             wp_send_json_success(array(
-                'message' => __('Automatic daily scanning enabled.', 'wp-alttext-updater'),
+                'message' => __('Automatic daily scanning enabled.', 'wp-alttext-auditor'),
                 'enabled' => true
             ));
         } else {
@@ -1095,7 +1082,7 @@ class WP_AltText_Updater {
             }
 
             wp_send_json_success(array(
-                'message' => __('Automatic daily scanning disabled.', 'wp-alttext-updater'),
+                'message' => __('Automatic daily scanning disabled.', 'wp-alttext-auditor'),
                 'enabled' => false
             ));
         }
@@ -1110,7 +1097,7 @@ class WP_AltText_Updater {
 
         // Check permissions
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(array('message' => __('Insufficient permissions', 'wp-alttext-updater')), 403);
+            wp_send_json_error(array('message' => __('Insufficient permissions', 'wp-alttext-auditor')), 403);
         }
 
         // Load required classes
@@ -1141,13 +1128,13 @@ class WP_AltText_Updater {
             ));
 
             wp_send_json_success(array(
-                'message' => __('Report generated successfully!', 'wp-alttext-updater'),
+                'message' => __('Report generated successfully!', 'wp-alttext-auditor'),
                 'report_url' => $report_url,
                 'filename' => $filename
             ));
         } else {
             wp_send_json_error(array(
-                'message' => __('Failed to generate report.', 'wp-alttext-updater')
+                'message' => __('Failed to generate report.', 'wp-alttext-auditor')
             ));
         }
     }
@@ -1161,14 +1148,14 @@ class WP_AltText_Updater {
 
         // Check permissions
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(array('message' => __('Insufficient permissions', 'wp-alttext-updater')), 403);
+            wp_send_json_error(array('message' => __('Insufficient permissions', 'wp-alttext-auditor')), 403);
         }
 
         // Get scan IDs
         $scan_ids = isset($_POST['scan_ids']) ? array_map('sanitize_text_field', $_POST['scan_ids']) : array();
 
         if (empty($scan_ids)) {
-            wp_send_json_error(array('message' => __('No scans selected.', 'wp-alttext-updater')));
+            wp_send_json_error(array('message' => __('No scans selected.', 'wp-alttext-auditor')));
         }
 
         // Load scan manager
@@ -1180,11 +1167,11 @@ class WP_AltText_Updater {
 
         if ($deleted > 0) {
             wp_send_json_success(array(
-                'message' => sprintf(__('Deleted %d scan(s) successfully.', 'wp-alttext-updater'), $deleted),
+                'message' => sprintf(__('Deleted %d scan(s) successfully.', 'wp-alttext-auditor'), $deleted),
                 'deleted' => $deleted
             ));
         } else {
-            wp_send_json_error(array('message' => __('Failed to delete scans.', 'wp-alttext-updater')));
+            wp_send_json_error(array('message' => __('Failed to delete scans.', 'wp-alttext-auditor')));
         }
     }
 
@@ -1197,7 +1184,7 @@ class WP_AltText_Updater {
 
         // Check permissions
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(array('message' => __('Insufficient permissions', 'wp-alttext-updater')), 403);
+            wp_send_json_error(array('message' => __('Insufficient permissions', 'wp-alttext-auditor')), 403);
         }
 
         // Load scan manager
@@ -1225,7 +1212,7 @@ class WP_AltText_Updater {
         }
 
         wp_send_json_success(array(
-            'message' => sprintf(__('Successfully cleared all scan data (%d scans deleted).', 'wp-alttext-updater'), $deleted)
+            'message' => sprintf(__('Successfully cleared all scan data (%d scans deleted).', 'wp-alttext-auditor'), $deleted)
         ));
     }
 
@@ -1238,7 +1225,7 @@ class WP_AltText_Updater {
 
         // Check permissions
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(array('message' => __('Insufficient permissions', 'wp-alttext-updater')), 403);
+            wp_send_json_error(array('message' => __('Insufficient permissions', 'wp-alttext-auditor')), 403);
         }
 
         // Get and validate days setting
@@ -1246,15 +1233,15 @@ class WP_AltText_Updater {
         $valid_options = array('never', '30', '60', '90', '120', '365');
 
         if (!in_array($days, $valid_options)) {
-            wp_send_json_error(array('message' => __('Invalid cleanup setting.', 'wp-alttext-updater')));
+            wp_send_json_error(array('message' => __('Invalid cleanup setting.', 'wp-alttext-auditor')));
         }
 
         // Save setting
         update_option('alttext_auto_cleanup_days', $days);
 
         $message = $days === 'never'
-            ? __('Auto-cleanup disabled. Scans will be kept indefinitely.', 'wp-alttext-updater')
-            : sprintf(__('Auto-cleanup enabled. Scans older than %s days will be automatically deleted.', 'wp-alttext-updater'), $days);
+            ? __('Auto-cleanup disabled. Scans will be kept indefinitely.', 'wp-alttext-auditor')
+            : sprintf(__('Auto-cleanup enabled. Scans older than %s days will be automatically deleted.', 'wp-alttext-auditor'), $days);
 
         wp_send_json_success(array('message' => $message));
     }
@@ -1268,14 +1255,14 @@ class WP_AltText_Updater {
 
         // Check permissions
         if (!current_user_can('upload_files')) {
-            wp_send_json_error(array('message' => __('Insufficient permissions', 'wp-alttext-updater')), 403);
+            wp_send_json_error(array('message' => __('Insufficient permissions', 'wp-alttext-auditor')), 403);
         }
 
         // Set cancellation flag
         set_transient('alttext_audit_scan_cancelled', true, MINUTE_IN_SECONDS);
 
         wp_send_json_success(array(
-            'message' => __('Scan cancellation requested. The scan will stop after the current batch completes.', 'wp-alttext-updater')
+            'message' => __('Scan cancellation requested. The scan will stop after the current batch completes.', 'wp-alttext-auditor')
         ));
     }
 
@@ -1358,8 +1345,7 @@ class WP_AltText_Updater {
         // Auto-cleanup based on age setting
         $scan_manager->auto_cleanup_by_age();
 
-        // Log scan completion
-        error_log('WP Alt Text Updater: Automatic scan completed. Content items: ' . ($content_result['total'] ?? 0) . ', Media items: ' . ($media_result['total'] ?? 0) . '. Report: ' . ($report_file ? basename($report_file) : 'failed'));
+        // Scan completed
     }
 
     /**
@@ -1455,17 +1441,7 @@ class WP_AltText_Updater {
 
             $scanned_count++;
 
-            // Log this site's scan
-            $site_details = get_blog_details($site->blog_id);
-            error_log(sprintf(
-                'WP Alt Text Updater [Multisite]: Scanned site %d/%d - %s (ID: %d). Content: %d, Media: %d',
-                $scanned_count,
-                $total_sites,
-                $site_details->blogname,
-                $site->blog_id,
-                $content_result['total'] ?? 0,
-                $media_result['total'] ?? 0
-            ));
+            // Site scan completed
 
             restore_current_blog();
         }
@@ -1474,13 +1450,7 @@ class WP_AltText_Updater {
         $new_index = ($last_index + $batch_size) % count($sites);
         update_site_option('alttext_cron_last_site_index', $new_index);
 
-        // Log overall completion
-        error_log(sprintf(
-            'WP Alt Text Updater [Multisite]: Batch scan completed. Scanned %d sites (batch size: %d). Next start index: %d',
-            $scanned_count,
-            $batch_size,
-            $new_index
-        ));
+        // Batch scan completed
     }
 
     /**
