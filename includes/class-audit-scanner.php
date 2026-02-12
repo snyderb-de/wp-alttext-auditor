@@ -322,8 +322,8 @@ class WP_AltText_Audit_Scanner {
         }
 
         // Extract path from URL
-        $parsed_url = parse_url($image_src);
-        if (!isset($parsed_url['path'])) {
+        $parsed_url = wp_parse_url($image_src);
+        if (!$parsed_url || !isset($parsed_url['path'])) {
             return null;
         }
 

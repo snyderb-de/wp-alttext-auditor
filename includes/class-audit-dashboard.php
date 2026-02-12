@@ -163,10 +163,13 @@ class WP_AltText_Audit_Dashboard {
 
                 <?php if ($cron_enabled && $next_scan) : ?>
                     <p class="description" id="next-scan-info">
-                        <?php printf(
+                        <?php
+                        /* translators: %s: formatted date/time for next scheduled scan */
+                        printf(
                             __('Next scan scheduled for: %s', 'alt-text-auditor'),
                             '<strong>' . wp_date(get_option('date_format') . ' ' . get_option('time_format'), $next_scan) . '</strong>'
-                        ); ?>
+                        );
+                        ?>
                     </p>
                 <?php endif; ?>
 
@@ -561,10 +564,13 @@ class WP_AltText_Audit_Dashboard {
                 <div class="tablenav top">
                     <div class="alignleft actions">
                         <span class="displaying-num">
-                            <?php printf(
+                            <?php
+                            /* translators: %s: number of items in the results table */
+                            printf(
                                 _n('%s item', '%s items', $results['total'], 'alt-text-auditor'),
                                 number_format_i18n($results['total'])
-                            ); ?>
+                            );
+                            ?>
                         </span>
                     </div>
                     <?php if ($results['total_pages'] > 1) : ?>

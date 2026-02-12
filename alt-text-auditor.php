@@ -3,7 +3,7 @@
  * Plugin Name: Alt Text Auditor
  * Plugin URI: https://github.com/snyderb-de/alt-text-auditor
  * Description: A comprehensive WordPress plugin for managing and auditing alt-text across your entire site with inline editing and powerful audit dashboard. Supports both single-site and multisite installations.
- * Version: 2.1.0
+ * Version: 2.1.2
  * Requires at least: 5.0
  * Requires PHP: 7.4
  * Author: Bryan Snyder (snyderb-de@gmail.com)
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
 
 // Define plugin constants
 if (!defined('ALTTEXT_AUDITOR_VERSION')) {
-    define('ALTTEXT_AUDITOR_VERSION', '2.1.0');
+    define('ALTTEXT_AUDITOR_VERSION', '2.1.2');
 }
 if (!defined('ALTTEXT_AUDITOR_PLUGIN_DIR')) {
     define('ALTTEXT_AUDITOR_PLUGIN_DIR', plugin_dir_path(__FILE__));
@@ -116,7 +116,7 @@ class WP_AltText_Updater {
                 echo '</div>';
                 echo '</div>';
             } else {
-                echo '<span class="alttext-not-image">' . __('Not an image', 'alt-text-auditor') . '</span>';
+                echo '<span class="alttext-not-image">' . esc_html__('Not an image', 'alt-text-auditor') . '</span>';
             }
         }
     }
@@ -708,9 +708,11 @@ class WP_AltText_Updater {
             'current_batch' => $batch,
             'results_count' => $result['results_count'],
             'scan_type' => $scan_type,
+            /* translators: %s: current item being scanned */
             'current_item' => !empty($result['last_item']) ? sprintf(__('Scanning: %s', 'alt-text-auditor'), $result['last_item']) : '',
             'message' => sprintf(
-                __('Processed %d of %d items (%d%%)', 'alt-text-auditor'),
+                /* translators: 1: processed count, 2: total count, 3: percent complete */
+                __('Processed %1$d of %2$d items (%3$d%%)', 'alt-text-auditor'),
                 $result['processed'],
                 $result['total'],
                 $result['percentage']
@@ -845,16 +847,6 @@ class WP_AltText_Updater {
             ));
         }
 
-        // If this result has an attachment_id, update the media library too
-        $saved_to_media = false;
-        if ($result->attachment_id) {
-            $attachment = get_post($result->attachment_id);
-            if ($attachment && $attachment->post_type === 'attachment') {
-                update_post_meta($result->attachment_id, '_wp_attachment_image_alt', $alt_text);
-                $saved_to_media = true;
-            }
-        }
-
         // If this is a post_content type, update the HTML in the post content
         $saved_to_post_content = false;
         if ($result->content_type === 'post_content' && $result->content_id) {
@@ -874,6 +866,8 @@ class WP_AltText_Updater {
             }
 
             if ($post && !empty($post->post_content)) {
+                $original_modified = $post->post_modified;
+
                 // Parse the post content HTML
                 libxml_use_internal_errors(true);
                 $dom = new DOMDocument();
@@ -887,8 +881,19 @@ class WP_AltText_Updater {
                     $src = $img->getAttribute('src');
 
                     // Match by full URL or by filename
-                    if ($src === $result->image_source ||
-                        basename(parse_url($src, PHP_URL_PATH)) === basename(parse_url($result->image_source, PHP_URL_PATH))) {
+                    $src_path = '';
+                    $src_parts = wp_parse_url($src);
+                    if (!empty($src_parts['path'])) {
+                        $src_path = $src_parts['path'];
+                    }
+
+                    $result_path = '';
+                    $result_parts = wp_parse_url($result->image_source);
+                    if (!empty($result_parts['path'])) {
+                        $result_path = $result_parts['path'];
+                    }
+
+                    if ($src === $result->image_source || basename($src_path) === basename($result_path)) {
 
                         // SECURITY: Escape alt-text to prevent HTML injection
                         // DOMDocument will handle the HTML entities properly
@@ -902,6 +907,14 @@ class WP_AltText_Updater {
                 }
 
                 if ($found_and_updated) {
+                    // Optimistic locking: detect concurrent edits
+                    $latest_post = get_post($result->content_id);
+                    if ($latest_post && $latest_post->post_modified !== $original_modified) {
+                        wp_send_json_error(array(
+                            'message' => __('This post was modified by another user. Please refresh and try again.', 'alt-text-auditor')
+                        ));
+                    }
+
                     // Save the updated HTML back to the post
                     $updated_html = $dom->saveHTML();
 
@@ -921,6 +934,16 @@ class WP_AltText_Updater {
                 }
 
                 libxml_clear_errors();
+            }
+        }
+
+        // If this result has an attachment_id, update the media library too
+        $saved_to_media = false;
+        if ($result->attachment_id) {
+            $attachment = get_post($result->attachment_id);
+            if ($attachment && $attachment->post_type === 'attachment') {
+                update_post_meta($result->attachment_id, '_wp_attachment_image_alt', $alt_text);
+                $saved_to_media = true;
             }
         }
 

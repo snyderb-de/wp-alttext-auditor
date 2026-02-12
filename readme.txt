@@ -4,7 +4,7 @@ Tags: alt-text, accessibility, media, wcag, multisite
 Requires at least: 5.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.1.0
+Stable tag: 2.1.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -104,6 +104,20 @@ Yes! The plugin has full multisite support with network activation, per-site dat
 6. CSV export with all filtered results
 
 == Changelog ==
+
+= 2.1.2 =
+*Release Date: February 12th, 2026*
+
+* NEW: Added a site search filter to the multisite network dashboard (filters current page)
+
+= 2.1.1 =
+*Release Date: February 12th, 2026*
+
+* NEW: Added conflict warning for concurrent post-content updates
+* IMPROVED: Network dashboard pagination and caching for large multisite networks
+* FIXED: Ordered translation placeholders and added translator comments for key strings
+* FIXED: Additional output escaping in HTML report and admin pages
+* DEV: Replaced remaining `parse_url()` usage with `wp_parse_url()`
 
 = 2.1.0 =
 *Release Date: February 12th, 2026*

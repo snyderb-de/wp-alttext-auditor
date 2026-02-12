@@ -45,7 +45,7 @@ $total_pages = ceil($total_items / $per_page);
 
                 <div class="alttext-filter-item alttext-search-item">
                     <label for="alttext-search"><?php _e('Search:', 'alt-text-auditor'); ?></label>
-                    <input type="search" name="s" id="alttext-search" value="<?php echo esc_attr($search); ?>" placeholder="<?php _e('Search filename or alt-text...', 'alt-text-auditor'); ?>" />
+                    <input type="search" name="s" id="alttext-search" value="<?php echo esc_attr($search); ?>" placeholder="<?php echo esc_attr__('Search filename or alt-text...', 'alt-text-auditor'); ?>" />
                 </div>
 
                 <div class="alttext-filter-item">
@@ -60,7 +60,10 @@ $total_pages = ceil($total_items / $per_page);
 
     <?php if ($media_query->have_posts()) : ?>
         <div class="alttext-stats">
-            <p><?php printf(__('Showing %d of %d images', 'alt-text-auditor'), count($media_query->posts), $total_items); ?></p>
+            <p><?php
+                /* translators: 1: number of images shown on this page, 2: total images */
+                printf(__('Showing %1$d of %2$d images', 'alt-text-auditor'), count($media_query->posts), $total_items);
+            ?></p>
         </div>
         
         <table class="wp-list-table widefat fixed striped">

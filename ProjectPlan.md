@@ -26,8 +26,8 @@ Consolidated TODOs and action items found across repo documentation and checklis
 2. Completed - Re-check capabilities after `switch_to_blog()` in network dashboard loop. Source: docs/SECURITY-AUDIT-V1.3.md
 
 ## C. Medium/Low Priority Security & Stability (v1.3 audit)
-1. Open - Add optimistic locking or conflict warning for concurrent post-content updates. Source: docs/SECURITY-AUDIT-V1.3.md
-2. Open - Add pagination and caching for network dashboard stats to avoid timeouts on large networks. Source: docs/SECURITY-AUDIT-V1.3.md
+1. Completed - Add optimistic locking or conflict warning for concurrent post-content updates. Source: docs/SECURITY-AUDIT-V1.3.md
+2. Completed - Add pagination and caching for network dashboard stats to avoid timeouts on large networks. Source: docs/SECURITY-AUDIT-V1.3.md
 3. Optional - Sanitize network settings checkbox with `absint()` for clarity. Source: docs/SECURITY-AUDIT-V1.3.md
 
 ## D. Plugin Check / WordPress.org Submission Fixes
@@ -37,10 +37,10 @@ Consolidated TODOs and action items found across repo documentation and checklis
 4. Verify - Readme "Tested up to" value updated to 6.9. Current readme.txt shows 6.9, but must be validated by actual testing. Source: PLUGIN-CHECK-TODO.md, readme.txt
 5. Completed - Readme tags reduced to 5. Current readme.txt shows 5 tags. Source: PLUGIN-CHECK-TODO.md, readme.txt
 6. Completed - Remove or guard remaining `error_log()` calls in production code (replaced with `alttext_auditor_log()` hook). Source: PLUGIN-CHECK-TODO.md, code scan
-7. Open - Add translator comments for key i18n strings (50+ instances referenced). Source: PLUGIN-CHECK-TODO.md, WHATS-NEXT.md
-8. Open - Fix unordered translation placeholders (8 instances). Source: PLUGIN-CHECK-TODO.md, WHATS-NEXT.md
-9. Open - Audit and add missing escaping (`esc_html`, `esc_attr`, `esc_url`) in flagged outputs. Source: PLUGIN-CHECK-TODO.md, WHATS-NEXT.md
-10. Open - Replace `parse_url()` with `wp_parse_url()` where flagged in includes/class-audit-scanner.php:498. Source: PLUGIN-CHECK-TODO.md, WHATS-NEXT.md
+7. Verify - Added translator comments for key placeholder strings; re-run Plugin Check to confirm remaining warnings. Source: PLUGIN-CHECK-TODO.md, WHATS-NEXT.md
+8. Completed - Fix unordered translation placeholders (8 instances). Source: PLUGIN-CHECK-TODO.md, WHATS-NEXT.md
+9. Completed - Audit and add missing escaping (`esc_html`, `esc_attr`, `esc_url`) in flagged outputs. Source: PLUGIN-CHECK-TODO.md, WHATS-NEXT.md
+10. Completed - Replace `parse_url()` with `wp_parse_url()` where flagged in includes/class-audit-scanner.php:498. Source: PLUGIN-CHECK-TODO.md, WHATS-NEXT.md
 11. Optional - Remove deprecated `load_plugin_textdomain()` if targeting WP 5.0+. Source: PLUGIN-CHECK-TODO.md, WHATS-NEXT.md
 12. Optional - Add object caching for frequently-run direct `$wpdb` queries beyond existing transients. Source: PLUGIN-CHECK-TODO.md, WHATS-NEXT.md
 13. Optional - Use specific superglobals for nonces (e.g., `$_POST` for AJAX). Source: PLUGIN-CHECK-TODO.md
@@ -89,3 +89,7 @@ Source: docs/SECURITY-AUDIT.md
 
 ## J. Maintenance
 1. Optional - Schedule annual security review or before major version updates. Source: docs/SECURITY-AUDIT.md
+
+## K. Pinned For Future Release
+1. Open - Add a network summary report with full-network totals computed in the background (cached). Source: user request (2026-02-12)
+2. Open - Add a manual “Run network scan now” option that queues batched cron scans. Source: user request (2026-02-12)

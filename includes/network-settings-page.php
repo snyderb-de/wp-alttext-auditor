@@ -179,8 +179,9 @@ $next_scan = wp_next_scheduled('alttext_audit_cron_scan');
                                 <?php
                                 if ($site_count > 0 && $batch_size > 0) {
                                     $days_for_full_cycle = ceil($site_count / $batch_size);
+                                    /* translators: 1: total sites in network, 2: batch size, 3: days for a full scan cycle */
                                     printf(
-                                        esc_html__('With %d sites and batch size %d, it will take %d days to scan all sites once.', 'alt-text-auditor'),
+                                        esc_html__('With %1$d sites and batch size %2$d, it will take %3$d days to scan all sites once.', 'alt-text-auditor'),
                                         $site_count,
                                         $batch_size,
                                         $days_for_full_cycle
