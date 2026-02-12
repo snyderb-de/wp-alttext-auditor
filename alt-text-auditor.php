@@ -3,7 +3,7 @@
  * Plugin Name: Alt Text Auditor
  * Plugin URI: https://github.com/snyderb-de/alt-text-auditor
  * Description: A comprehensive WordPress plugin for managing and auditing alt-text across your entire site with inline editing and powerful audit dashboard. Supports both single-site and multisite installations.
- * Version: 2.1.2
+ * Version: 2.1.4
  * Requires at least: 5.0
  * Requires PHP: 7.4
  * Author: Bryan Snyder (snyderb-de@gmail.com)
@@ -19,13 +19,44 @@ if (!defined('ABSPATH')) {
 
 // Define plugin constants
 if (!defined('ALTTEXT_AUDITOR_VERSION')) {
-    define('ALTTEXT_AUDITOR_VERSION', '2.1.2');
+    define('ALTTEXT_AUDITOR_VERSION', '2.1.4');
 }
 if (!defined('ALTTEXT_AUDITOR_PLUGIN_DIR')) {
     define('ALTTEXT_AUDITOR_PLUGIN_DIR', plugin_dir_path(__FILE__));
 }
 if (!defined('ALTTEXT_AUDITOR_PLUGIN_URL')) {
     define('ALTTEXT_AUDITOR_PLUGIN_URL', plugin_dir_url(__FILE__));
+}
+
+if (!function_exists('alttext_auditor_get_log_file_path')) {
+    /**
+     * Get the log file path for debug logging.
+     *
+     * @param bool $ensure_dir Whether to create the log directory if needed.
+     * @return string Log file path or empty string on failure.
+     */
+    function alttext_auditor_get_log_file_path($ensure_dir = false) {
+        if (!function_exists('wp_upload_dir')) {
+            return '';
+        }
+
+        $upload_dir = wp_upload_dir();
+        if (!empty($upload_dir['error']) || empty($upload_dir['basedir'])) {
+            return '';
+        }
+
+        $log_dir = trailingslashit($upload_dir['basedir']) . 'alttext-logs';
+
+        if ($ensure_dir && !file_exists($log_dir)) {
+            wp_mkdir_p($log_dir);
+            $htaccess = trailingslashit($log_dir) . '.htaccess';
+            if (!file_exists($htaccess)) {
+                @file_put_contents($htaccess, "Deny from all\n");
+            }
+        }
+
+        return trailingslashit($log_dir) . 'alttext-auditor.log';
+    }
 }
 
 if (!function_exists('alttext_auditor_log')) {
@@ -37,6 +68,24 @@ if (!function_exists('alttext_auditor_log')) {
      */
     function alttext_auditor_log($message, $context = array()) {
         do_action('alttext_auditor_log', $message, $context);
+
+        $enabled = get_option('alttext_debug_logging_enabled', 0);
+        if (!$enabled) {
+            return;
+        }
+
+        $log_file = alttext_auditor_get_log_file_path(true);
+        if (empty($log_file)) {
+            return;
+        }
+
+        $entry = '[' . current_time('mysql') . '] ' . (string) $message;
+        if (!empty($context)) {
+            $entry .= ' ' . wp_json_encode($context);
+        }
+        $entry .= PHP_EOL;
+
+        @file_put_contents($log_file, $entry, FILE_APPEND | LOCK_EX);
     }
 }
 
@@ -73,6 +122,9 @@ class WP_AltText_Updater {
             add_action('wp_ajax_alttext_delete_scans', array($this, 'ajax_delete_scans'));
             add_action('wp_ajax_alttext_clear_all_data', array($this, 'ajax_clear_all_data'));
             add_action('wp_ajax_alttext_save_cleanup_setting', array($this, 'ajax_save_cleanup_setting'));
+            add_action('wp_ajax_alttext_save_report_retention', array($this, 'ajax_save_report_retention'));
+            add_action('wp_ajax_alttext_toggle_debug_logging', array($this, 'ajax_toggle_debug_logging'));
+            add_action('wp_ajax_alttext_clear_log', array($this, 'ajax_clear_log'));
             add_action('wp_ajax_alttext_cancel_scan', array($this, 'ajax_cancel_scan'));
             add_filter('manage_media_columns', array($this, 'add_alt_text_column'));
             add_action('manage_media_custom_column', array($this, 'display_alt_text_column'), 10, 2);
@@ -191,20 +243,23 @@ class WP_AltText_Updater {
         }
 
         $view = isset($_GET['view']) ? sanitize_text_field($_GET['view']) : 'manager';
-        $view = in_array($view, array('manager', 'audit'), true) ? $view : 'manager';
-        if ($view === 'audit' && !current_user_can('manage_options')) {
-            $view = 'manager';
-        }
+        $view = in_array($view, array('manager', 'audit', 'settings'), true) ? $view : 'manager';
 
         $show_audit_notice = false;
+        $show_settings_notice = false;
         if ($view === 'audit' && !current_user_can('manage_options')) {
             $view = 'manager';
             $show_audit_notice = true;
+        }
+        if ($view === 'settings' && !current_user_can('manage_options')) {
+            $view = 'manager';
+            $show_settings_notice = true;
         }
 
         $base_url = admin_url('admin.php?page=alt-text-auditor');
         $manager_url = add_query_arg('view', 'manager', $base_url);
         $audit_url = add_query_arg('view', 'audit', $base_url);
+        $settings_url = add_query_arg('view', 'settings', $base_url);
         ?>
         <div class="wrap">
             <h1 class="wp-heading-inline"><?php echo esc_html(get_admin_page_title()); ?></h1>
@@ -217,6 +272,9 @@ class WP_AltText_Updater {
                 <a href="<?php echo esc_url($audit_url); ?>" class="nav-tab <?php echo ($view === 'audit') ? 'nav-tab-active' : ''; ?>">
                     <?php echo esc_html__('Audit', 'alt-text-auditor'); ?>
                 </a>
+                <a href="<?php echo esc_url($settings_url); ?>" class="nav-tab <?php echo ($view === 'settings') ? 'nav-tab-active' : ''; ?>">
+                    <?php echo esc_html__('Settings', 'alt-text-auditor'); ?>
+                </a>
             </nav>
 
             <?php if ($show_audit_notice) : ?>
@@ -224,10 +282,17 @@ class WP_AltText_Updater {
                     <p><?php echo esc_html__('You do not have permission to access the Audit dashboard. Showing Manager instead.', 'alt-text-auditor'); ?></p>
                 </div>
             <?php endif; ?>
+            <?php if ($show_settings_notice) : ?>
+                <div class="notice notice-warning">
+                    <p><?php echo esc_html__('You do not have permission to access Settings. Showing Manager instead.', 'alt-text-auditor'); ?></p>
+                </div>
+            <?php endif; ?>
 
             <?php
             if ($view === 'audit') {
                 $this->render_audit_dashboard();
+            } elseif ($view === 'settings') {
+                $this->render_settings_page();
             } else {
                 include ALTTEXT_AUDITOR_PLUGIN_DIR . 'includes/admin-page.php';
             }
@@ -252,6 +317,27 @@ class WP_AltText_Updater {
 
         $dashboard = new WP_AltText_Audit_Dashboard();
         $dashboard->render_dashboard();
+    }
+
+    /**
+     * Render the settings page
+     */
+    public function render_settings_page() {
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.'));
+        }
+
+        // Load dashboard class for shared settings UI
+        require_once ALTTEXT_AUDITOR_PLUGIN_DIR . 'includes/class-audit-dashboard.php';
+
+        $dashboard = new WP_AltText_Audit_Dashboard();
+        ?>
+        <div class="audit-dashboard-wrap">
+            <div class="audit-tab-content">
+                <?php $dashboard->render_settings_tab(); ?>
+            </div>
+        </div>
+        <?php
     }
 
     /**
@@ -485,7 +571,7 @@ class WP_AltText_Updater {
         }
 
         $view = isset($_GET['view']) ? sanitize_text_field($_GET['view']) : 'manager';
-        $view = in_array($view, array('manager', 'audit'), true) ? $view : 'manager';
+        $view = in_array($view, array('manager', 'audit', 'settings'), true) ? $view : 'manager';
 
         // Load admin JS only on media library and manager tab
         if ($hook === 'upload.php' || ($hook === 'media_page_alt-text-auditor' && $view === 'manager')) {
@@ -506,7 +592,7 @@ class WP_AltText_Updater {
         }
 
         // Enqueue audit dashboard assets only on audit tab
-        if ($hook === 'media_page_alt-text-auditor' && $view === 'audit') {
+        if ($hook === 'media_page_alt-text-auditor' && in_array($view, array('audit', 'settings'), true)) {
             wp_enqueue_script(
                 'wp-alttext-updater-audit-dashboard',
                 ALTTEXT_AUDITOR_PLUGIN_URL . 'assets/js/audit-dashboard.js',
@@ -524,7 +610,7 @@ class WP_AltText_Updater {
         }
 
         // Localize script for AJAX - use appropriate script handle based on view
-        $script_handle = ($hook === 'media_page_alt-text-auditor' && $view === 'audit')
+        $script_handle = ($hook === 'media_page_alt-text-auditor' && in_array($view, array('audit', 'settings'), true))
             ? 'wp-alttext-updater-audit-dashboard'
             : 'wp-alttext-updater-admin';
 
@@ -1360,6 +1446,87 @@ class WP_AltText_Updater {
     }
 
     /**
+     * AJAX handler for saving report retention setting
+     */
+    public function ajax_save_report_retention() {
+        // Check nonce
+        check_ajax_referer('alttext_audit_nonce', 'nonce');
+
+        // Check permissions
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('Insufficient permissions', 'alt-text-auditor')), 403);
+        }
+
+        $count = isset($_POST['count']) ? absint($_POST['count']) : 0;
+        if ($count < 1 || $count > 200) {
+            wp_send_json_error(array('message' => __('Report retention must be between 1 and 200.', 'alt-text-auditor')));
+        }
+
+        update_option('alttext_report_retention_count', $count);
+
+        // Cleanup old reports beyond the new limit
+        require_once ALTTEXT_AUDITOR_PLUGIN_DIR . 'includes/class-html-report.php';
+        WP_AltText_HTML_Report::cleanup_old_reports();
+
+        wp_send_json_success(array(
+            'message' => __('Report retention updated.', 'alt-text-auditor'),
+            'count' => $count
+        ));
+    }
+
+    /**
+     * AJAX handler for toggling debug logging
+     */
+    public function ajax_toggle_debug_logging() {
+        // Check nonce
+        check_ajax_referer('alttext_audit_nonce', 'nonce');
+
+        // Check permissions
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('Insufficient permissions', 'alt-text-auditor')), 403);
+        }
+
+        $enabled = isset($_POST['enabled']) && $_POST['enabled'] === 'true';
+        update_option('alttext_debug_logging_enabled', $enabled ? 1 : 0);
+
+        $message = $enabled
+            ? __('Debug logging enabled.', 'alt-text-auditor')
+            : __('Debug logging disabled.', 'alt-text-auditor');
+
+        wp_send_json_success(array(
+            'message' => $message,
+            'enabled' => $enabled
+        ));
+    }
+
+    /**
+     * AJAX handler for clearing debug log
+     */
+    public function ajax_clear_log() {
+        // Check nonce
+        check_ajax_referer('alttext_audit_nonce', 'nonce');
+
+        // Check permissions
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('Insufficient permissions', 'alt-text-auditor')), 403);
+        }
+
+        $log_file = alttext_auditor_get_log_file_path(true);
+        if (empty($log_file)) {
+            wp_send_json_error(array('message' => __('Log file is unavailable.', 'alt-text-auditor')));
+        }
+
+        if (file_exists($log_file)) {
+            @unlink($log_file);
+        }
+
+        wp_send_json_success(array(
+            'message' => __('Log file cleared.', 'alt-text-auditor'),
+            'log_size' => __('No log file found', 'alt-text-auditor')
+        ));
+    }
+
+    /**
      * AJAX handler for cancelling an in-progress scan
      */
     public function ajax_cancel_scan() {
@@ -1604,6 +1771,8 @@ class WP_AltText_Updater {
 
         // Set default options
         add_option('alttext_audit_cron_enabled', 0);
+        add_option('alttext_report_retention_count', 20);
+        add_option('alttext_debug_logging_enabled', 0);
         add_option('alttext_audit_version', ALTTEXT_AUDITOR_VERSION);
     }
 

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.1.4 - 2026-02-12
+- Moved the Settings tab to the top-level navigation (alongside Manager and Audit).
+
+## 2.1.3 - 2026-02-12
+- Added a Settings tab with report retention controls.
+- Added a debug logging toggle with log size warning and clear log button.
+- Moved automatic daily scanning and data management controls into Settings.
+
 ## 2.1.2 - 2026-02-12
 - Added a site search filter to the multisite network dashboard (filters current page).
 

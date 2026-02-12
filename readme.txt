@@ -4,7 +4,7 @@ Tags: alt-text, accessibility, media, wcag, multisite
 Requires at least: 5.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.1.2
+Stable tag: 2.1.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -104,6 +104,18 @@ Yes! The plugin has full multisite support with network activation, per-site dat
 6. CSV export with all filtered results
 
 == Changelog ==
+
+= 2.1.4 =
+*Release Date: February 12th, 2026*
+
+* FIXED: Settings tab is now top-level (alongside Manager and Audit)
+
+= 2.1.3 =
+*Release Date: February 12th, 2026*
+
+* NEW: Added a top-level Settings tab with report retention controls
+* NEW: Added debug logging toggle with log size warning and clear log button
+* CHANGED: Moved automatic daily scanning and data management controls to Settings
 
 = 2.1.2 =
 *Release Date: February 12th, 2026*

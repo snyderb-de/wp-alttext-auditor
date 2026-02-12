@@ -144,17 +144,42 @@ class WP_AltText_Audit_Dashboard {
                 </p>
             </div>
 
+        </div>
+        <?php
+    }
+
+    /**
+     * Render the settings tab
+     *
+     * Displays audit settings and maintenance controls
+     */
+    public function render_settings_tab() {
+        $cron_enabled = get_option('alttext_audit_cron_enabled', 0);
+        $next_scan = wp_next_scheduled('alttext_audit_cron_scan');
+        $cleanup_days = get_option('alttext_auto_cleanup_days', 'never');
+        $report_retention = absint(get_option('alttext_report_retention_count', 20));
+        if ($report_retention < 1) {
+            $report_retention = 1;
+        } elseif ($report_retention > 200) {
+            $report_retention = 200;
+        }
+
+        $debug_logging_enabled = get_option('alttext_debug_logging_enabled', 0);
+        $log_file = alttext_auditor_get_log_file_path();
+        $log_size_display = __('No log file found', 'alt-text-auditor');
+        if (!empty($log_file) && file_exists($log_file)) {
+            $log_size_display = size_format(filesize($log_file));
+        }
+        ?>
+        <div class="audit-settings-tab">
+            <h2><?php _e('Settings', 'alt-text-auditor'); ?></h2>
+
             <!-- Automatic Scanning -->
             <div class="audit-scan-controls" style="margin-top: 20px;">
                 <h3><?php _e('Automatic Daily Scanning', 'alt-text-auditor'); ?></h3>
                 <p class="description">
                     <?php _e('Enable automatic daily scans to keep your audit results up-to-date without manual intervention.', 'alt-text-auditor'); ?>
                 </p>
-
-                <?php
-                $cron_enabled = get_option('alttext_audit_cron_enabled', 0);
-                $next_scan = wp_next_scheduled('alttext_audit_cron_scan');
-                ?>
 
                 <label class="audit-cron-toggle" title="<?php esc_attr_e('Automatically run a full scan once per day using WordPress cron system', 'alt-text-auditor'); ?>">
                     <input type="checkbox" id="cron-enabled-checkbox" <?php checked($cron_enabled, 1); ?>>
@@ -176,6 +201,24 @@ class WP_AltText_Audit_Dashboard {
                 <p class="audit-cron-status" id="cron-status-message" style="display:none;"></p>
             </div>
 
+            <!-- Report Retention -->
+            <div class="audit-scan-controls" style="margin-top: 20px;">
+                <h3><?php _e('Report Retention', 'alt-text-auditor'); ?></h3>
+                <p class="description">
+                    <?php _e('Choose how many HTML reports to keep. Older reports are deleted when new reports are generated.', 'alt-text-auditor'); ?>
+                </p>
+                <label for="report-retention-count">
+                    <strong><?php _e('Keep the most recent reports:', 'alt-text-auditor'); ?></strong>
+                </label>
+                <input type="number" id="report-retention-count" min="1" max="200" step="1" value="<?php echo esc_attr($report_retention); ?>" style="margin-left: 10px; width: 100px;">
+                <button type="button" id="save-report-retention-btn" class="button" style="margin-left: 10px;">
+                    <?php _e('Save Setting', 'alt-text-auditor'); ?>
+                </button>
+                <p class="description" style="margin-top: 5px;">
+                    <?php _e('Range: 1–200 reports.', 'alt-text-auditor'); ?>
+                </p>
+            </div>
+
             <!-- Data Management -->
             <div class="audit-scan-controls" style="margin-top: 20px;">
                 <h3><?php _e('Data Management', 'alt-text-auditor'); ?></h3>
@@ -190,7 +233,6 @@ class WP_AltText_Audit_Dashboard {
                     </label>
                     <select id="auto-cleanup-days" name="auto_cleanup_days" style="margin-left: 10px;">
                         <?php
-                        $cleanup_days = get_option('alttext_auto_cleanup_days', 'never');
                         $options = array(
                             'never' => __('Never (keep all)', 'alt-text-auditor'),
                             '30' => __('30 days', 'alt-text-auditor'),
@@ -227,6 +269,27 @@ class WP_AltText_Audit_Dashboard {
                 </div>
             </div>
 
+            <!-- Debug Logging -->
+            <div class="audit-scan-controls" style="margin-top: 20px;">
+                <h3><?php _e('Debug Logging', 'alt-text-auditor'); ?></h3>
+                <p class="description">
+                    <?php _e('Enable logging for troubleshooting. Disable when not needed.', 'alt-text-auditor'); ?>
+                </p>
+                <label class="audit-cron-toggle" title="<?php esc_attr_e('Write debug logs to the uploads directory', 'alt-text-auditor'); ?>">
+                    <input type="checkbox" id="debug-logging-enabled" <?php checked($debug_logging_enabled, 1); ?>>
+                    <span><?php _e('Enable debug logging', 'alt-text-auditor'); ?></span>
+                </label>
+                <p class="description" style="margin-top: 8px;">
+                    <?php _e('Warning: Log files can grow large. Clear the log after troubleshooting.', 'alt-text-auditor'); ?>
+                </p>
+                <p class="description">
+                    <?php _e('Current log size:', 'alt-text-auditor'); ?>
+                    <strong id="alttext-log-size"><?php echo esc_html($log_size_display); ?></strong>
+                </p>
+                <button type="button" id="clear-log-btn" class="button">
+                    <?php _e('Clear Log', 'alt-text-auditor'); ?>
+                </button>
+            </div>
         </div>
         <?php
     }

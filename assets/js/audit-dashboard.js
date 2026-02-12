@@ -1043,6 +1043,108 @@ jQuery(document).ready(function($) {
             });
         });
 
+        // Save report retention setting
+        $('#save-report-retention-btn').on('click', function() {
+            var $btn = $(this);
+            var count = parseInt($('#report-retention-count').val(), 10);
+            var originalText = $btn.text();
+
+            if (isNaN(count) || count < 1 || count > 200) {
+                showError('Please enter a number between 1 and 200.');
+                return;
+            }
+
+            $btn.prop('disabled', true).text('Saving...');
+
+            $.ajax({
+                url: altTextAuditor.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'alttext_save_report_retention',
+                    nonce: altTextAuditor.audit_nonce,
+                    count: count
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showSuccess(response.data.message);
+                    } else {
+                        showError(response.data.message || 'Failed to save report retention.');
+                    }
+                },
+                error: function() {
+                    showError('Error saving report retention. Please try again.');
+                },
+                complete: function() {
+                    $btn.prop('disabled', false).text(originalText);
+                }
+            });
+        });
+
+        // Toggle debug logging
+        $('#debug-logging-enabled').on('change', function() {
+            var $checkbox = $(this);
+            var enabled = $checkbox.is(':checked');
+
+            $.ajax({
+                url: altTextAuditor.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'alttext_toggle_debug_logging',
+                    nonce: altTextAuditor.audit_nonce,
+                    enabled: enabled
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showSuccess(response.data.message);
+                    } else {
+                        showError(response.data.message || 'Failed to update debug logging.');
+                        $checkbox.prop('checked', !enabled);
+                    }
+                },
+                error: function() {
+                    showError('Error updating debug logging. Please try again.');
+                    $checkbox.prop('checked', !enabled);
+                }
+            });
+        });
+
+        // Clear debug log
+        $('#clear-log-btn').on('click', function() {
+            if (!confirm('Clear the debug log now? This cannot be undone.')) {
+                return;
+            }
+
+            var $btn = $(this);
+            var originalText = $btn.text();
+
+            $btn.prop('disabled', true).text('Clearing...');
+
+            $.ajax({
+                url: altTextAuditor.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'alttext_clear_log',
+                    nonce: altTextAuditor.audit_nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showSuccess(response.data.message);
+                        if (response.data.log_size) {
+                            $('#alttext-log-size').text(response.data.log_size);
+                        }
+                    } else {
+                        showError(response.data.message || 'Failed to clear log.');
+                    }
+                },
+                error: function() {
+                    showError('Error clearing log. Please try again.');
+                },
+                complete: function() {
+                    $btn.prop('disabled', false).text(originalText);
+                }
+            });
+        });
+
         // Clear all data
         $('#clear-all-data-btn').on('click', function() {
             if (!confirm('Are you sure you want to delete ALL scan records and reports?\n\nThis will permanently delete:\n- All scan history\n- All HTML reports\n- All scan statistics\n\nThis action CANNOT be undone!')) {

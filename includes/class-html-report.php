@@ -295,6 +295,22 @@ class WP_AltText_HTML_Report {
     }
 
     /**
+     * Get report retention count.
+     *
+     * @return int Retention count (min 1, max 200)
+     */
+    private function get_report_retention_count() {
+        $count = absint(get_option('alttext_report_retention_count', 20));
+        if ($count < 1) {
+            $count = 1;
+        } elseif ($count > 200) {
+            $count = 200;
+        }
+
+        return $count;
+    }
+
+    /**
      * Save report to uploads directory
      *
      * @param string $html HTML content
@@ -338,6 +354,7 @@ class WP_AltText_HTML_Report {
      */
     private function store_report_info($filename) {
         $reports = get_option('alttext_audit_reports', array());
+        $max_reports = $this->get_report_retention_count();
 
         // Add new report to beginning of array
         array_unshift($reports, array(
@@ -346,8 +363,8 @@ class WP_AltText_HTML_Report {
             'timestamp' => current_time('timestamp')
         ));
 
-        // Keep only last 20 reports
-        $reports = array_slice($reports, 0, 20);
+        // Keep only last N reports
+        $reports = array_slice($reports, 0, $max_reports);
 
         update_option('alttext_audit_reports', $reports);
     }
@@ -386,14 +403,20 @@ class WP_AltText_HTML_Report {
         }
 
         $files = glob($reports_dir . '/alttext-report-*.html');
+        $max_reports = absint(get_option('alttext_report_retention_count', 20));
+        if ($max_reports < 1) {
+            $max_reports = 1;
+        } elseif ($max_reports > 200) {
+            $max_reports = 200;
+        }
 
         // Sort by modification time, newest first
         usort($files, function($a, $b) {
             return filemtime($b) - filemtime($a);
         });
 
-        // Delete all except the 20 newest
-        $files_to_delete = array_slice($files, 20);
+        // Delete all except the newest N
+        $files_to_delete = array_slice($files, $max_reports);
         foreach ($files_to_delete as $file) {
             @unlink($file);
         }
