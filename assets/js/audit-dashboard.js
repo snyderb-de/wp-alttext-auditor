@@ -1011,6 +1011,15 @@ jQuery(document).ready(function($) {
      * Bind data management buttons
      */
     function bindDataManagement() {
+        function updateCleanupWarning() {
+            var value = $('#auto-cleanup-days').val();
+            if (value === 'never') {
+                $('#auto-cleanup-warning').show();
+            } else {
+                $('#auto-cleanup-warning').hide();
+            }
+        }
+
         // Save cleanup setting
         $('#save-cleanup-setting-btn').on('click', function() {
             var $btn = $(this);
@@ -1039,9 +1048,13 @@ jQuery(document).ready(function($) {
                 },
                 complete: function() {
                     $btn.prop('disabled', false).text(originalText);
+                    updateCleanupWarning();
                 }
             });
         });
+
+        $('#auto-cleanup-days').on('change', updateCleanupWarning);
+        updateCleanupWarning();
 
         // Save report retention setting
         $('#save-report-retention-btn').on('click', function() {

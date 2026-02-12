@@ -4,7 +4,7 @@ Tags: alt-text, accessibility, media, wcag, multisite
 Requires at least: 5.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.1.5
+Stable tag: 2.1.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -104,6 +104,12 @@ Yes! The plugin has full multisite support with network activation, per-site dat
 6. CSV export with all filtered results
 
 == Changelog ==
+
+= 2.1.6 =
+*Release Date: February 12th, 2026*
+
+* CHANGED: Added a warning when auto-cleanup is set to "Never"
+* CHANGED: Clarified how report retention and auto-cleanup interact
 
 = 2.1.5 =
 *Release Date: February 12th, 2026*

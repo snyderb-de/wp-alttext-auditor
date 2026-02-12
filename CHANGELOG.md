@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.1.6 - 2026-02-12
+- Added a warning when auto-cleanup is set to "Never".
+- Clarified how report retention and auto-cleanup interact.
+
 ## 2.1.5 - 2026-02-12
 - Changed default auto-cleanup to keep reports and scans for 1 year.
 

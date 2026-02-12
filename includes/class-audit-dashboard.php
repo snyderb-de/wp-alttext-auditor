@@ -217,6 +217,9 @@ class WP_AltText_Audit_Dashboard {
                 <p class="description" style="margin-top: 5px;">
                     <?php _e('Range: 1–200 reports.', 'alt-text-auditor'); ?>
                 </p>
+                <p class="description">
+                    <?php _e('Auto-cleanup may remove reports sooner based on age. The stricter limit is applied.', 'alt-text-auditor'); ?>
+                </p>
             </div>
 
             <!-- Data Management -->
@@ -254,6 +257,9 @@ class WP_AltText_Audit_Dashboard {
                     <p class="description" style="margin-top: 5px;">
                         <?php _e('Old scans and their HTML reports will be automatically deleted based on this setting.', 'alt-text-auditor'); ?>
                     </p>
+                    <p class="description" id="auto-cleanup-warning" style="margin-top: 5px; color: #b32d2e; <?php echo $cleanup_days === 'never' ? '' : 'display:none;'; ?>">
+                        <?php _e('Warning: Choosing "Never" can cause scan history and reports to grow over time. Monitor storage and consider periodic cleanup.', 'alt-text-auditor'); ?>
+                    </p>
                 </div>
 
                 <!-- Clear All Data Button -->
@@ -280,7 +286,7 @@ class WP_AltText_Audit_Dashboard {
                     <span><?php _e('Enable debug logging', 'alt-text-auditor'); ?></span>
                 </label>
                 <p class="description" style="margin-top: 8px;">
-                    <?php _e('Warning: Log files can grow large. Clear the log after troubleshooting.', 'alt-text-auditor'); ?>
+                    <?php _e('Warning: Log files are not rotated and can grow large. Clear the log after troubleshooting.', 'alt-text-auditor'); ?>
                 </p>
                 <p class="description">
                     <?php _e('Current log size:', 'alt-text-auditor'); ?>
