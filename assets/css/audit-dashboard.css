@@ -530,6 +530,14 @@
     border-left-color: #dba617;
 }
 
+.alttext-warning {
+    color: #1d2327;
+}
+
+.alttext-warning.alttext-warning--alert {
+    color: #d63638;
+}
+
 /* ==========================================================================
    Responsive Design
    ========================================================================== */

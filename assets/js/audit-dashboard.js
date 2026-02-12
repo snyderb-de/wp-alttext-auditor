@@ -1013,11 +1013,18 @@ jQuery(document).ready(function($) {
     function bindDataManagement() {
         function updateCleanupWarning() {
             var value = $('#auto-cleanup-days').val();
-            if (value === 'never') {
-                $('#auto-cleanup-warning').show();
-            } else {
-                $('#auto-cleanup-warning').hide();
-            }
+            $('#auto-cleanup-warning').toggleClass('alttext-warning--alert', value === 'never');
+        }
+
+        function updateRetentionWarning() {
+            var count = parseInt($('#report-retention-count').val(), 10);
+            var shouldWarn = !isNaN(count) && count > 50;
+            $('#report-retention-warning').toggleClass('alttext-warning--alert', shouldWarn);
+        }
+
+        function updateDebugWarning() {
+            var enabled = $('#debug-logging-enabled').is(':checked');
+            $('#debug-logging-warning').toggleClass('alttext-warning--alert', enabled);
         }
 
         // Save cleanup setting
@@ -1056,6 +1063,11 @@ jQuery(document).ready(function($) {
         $('#auto-cleanup-days').on('change', updateCleanupWarning);
         updateCleanupWarning();
 
+        $('#report-retention-count').on('input change', updateRetentionWarning);
+        updateRetentionWarning();
+
+        updateDebugWarning();
+
         // Save report retention setting
         $('#save-report-retention-btn').on('click', function() {
             var $btn = $(this);
@@ -1089,6 +1101,7 @@ jQuery(document).ready(function($) {
                 },
                 complete: function() {
                     $btn.prop('disabled', false).text(originalText);
+                    updateRetentionWarning();
                 }
             });
         });
@@ -1109,14 +1122,17 @@ jQuery(document).ready(function($) {
                 success: function(response) {
                     if (response.success) {
                         showSuccess(response.data.message);
+                        updateDebugWarning();
                     } else {
                         showError(response.data.message || 'Failed to update debug logging.');
                         $checkbox.prop('checked', !enabled);
+                        updateDebugWarning();
                     }
                 },
                 error: function() {
                     showError('Error updating debug logging. Please try again.');
                     $checkbox.prop('checked', !enabled);
+                    updateDebugWarning();
                 }
             });
         });

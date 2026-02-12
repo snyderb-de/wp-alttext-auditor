@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.1.7 - 2026-02-12
+- Updated warning styling to default to black and turn red at thresholds.
+
 ## 2.1.6 - 2026-02-12
 - Added a warning when auto-cleanup is set to "Never".
 - Clarified how report retention and auto-cleanup interact.
