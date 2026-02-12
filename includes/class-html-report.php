@@ -79,7 +79,7 @@ class WP_AltText_HTML_Report {
 
         // Log only if failed
         if (!$result) {
-            error_log('WP Alt Text Updater: Failed to generate/save HTML report');
+            alttext_auditor_log('Failed to generate/save HTML report.');
         }
 
         return $result;

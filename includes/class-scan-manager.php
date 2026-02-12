@@ -256,7 +256,10 @@ class WP_AltText_Scan_Manager {
         if (!empty($scan_ids_to_delete)) {
             $deleted = $this->delete_scans($scan_ids_to_delete);
             if ($deleted > 0) {
-                error_log("WP Alt Text Updater: Auto-cleanup deleted {$deleted} scans older than {$days} days");
+                alttext_auditor_log('Auto-cleanup deleted scans.', array(
+                    'deleted' => $deleted,
+                    'days' => $days
+                ));
             }
         }
     }

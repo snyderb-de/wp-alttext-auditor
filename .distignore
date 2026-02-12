@@ -1,0 +1,32 @@
+# VCS and tooling
+.git/
+.github/
+.claude/
+.claude-code/
+
+# Documentation (not needed in distribution zip)
+docs/
+README.md
+WHATS-NEXT.md
+PLUGIN-CHECK-TODO.md
+ProjectPlan.md
+
+# WordPress.org assets (handled separately)
+.wordpress-org/
+
+# OS / editor files
+.DS_Store
+
+# Dependencies
+node_modules/
+vendor/
+
+# Build artifacts
+*.zip
+*.tar.gz
+*.rar
+dist/
+build/
+
+# Tests
+tests/

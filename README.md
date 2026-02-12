@@ -14,7 +14,7 @@ A comprehensive WordPress plugin for managing and auditing alt-text across your 
 - **Real-time Visual Feedback**: Loading, success, and error indicators show the save status
 - **Image Detection**: Only shows alt-text fields for actual image files
 
-### Alt Text Manager Page
+### Alt Text Manager Tab
 
 - **Dedicated Interface**: Browse all media library images with thumbnails
 - **Live Search**: Real-time filtering as you type - searches both filenames and alt-text
@@ -24,7 +24,7 @@ A comprehensive WordPress plugin for managing and auditing alt-text across your 
 - **Pagination Support**: Handle large media libraries with paginated views
 - **Quick Access**: Direct links to view or edit images
 
-### Alt-Text Audit Dashboard (NEW)
+### Alt-Text Audit Dashboard Tab
 
 - **Site-Wide Scanning**: Scans all published posts, pages, and media library for missing alt-text
 - **Real-time Progress**: Animated progress bar during scans with batch processing
@@ -63,9 +63,9 @@ A comprehensive WordPress plugin for managing and auditing alt-text across your 
 
 ### Single-Site Installation
 
-1. Upload the plugin files to `/wp-content/plugins/wp-alttext-auditor/`
+1. Upload the plugin files to `/wp-content/plugins/alt-text-auditor/`
 2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Navigate to **Media > Alt-Text Audit** to run your first scan
+3. Navigate to **Media > Alt Text Auditor** and select the **Audit** tab to run your first scan
 
 ### Multisite (Network) Installation
 
@@ -73,13 +73,13 @@ A comprehensive WordPress plugin for managing and auditing alt-text across your 
 2. **Network Activate** the plugin through the 'Network Admin > Plugins' menu
 3. Database tables will be automatically created for all sites in the network
 4. Network admins can view network-wide statistics at **Network Admin > Alt-Text Audit**
-5. Site admins can manage their site's alt-text at **Media > Alt-Text Audit** on each site
+5. Site admins can manage their site's alt-text at **Media > Alt Text Auditor** on each site
 
 ## Usage
 
 ### Site-Wide Audit (Recommended First Step)
 
-1. Go to **Media > Alt-Text Audit** in your WordPress admin
+1. Go to **Media > Alt Text Auditor** in your WordPress admin and select the **Audit** tab
 2. Click **"Scan Published Content"** to scan all posts and pages for images
 3. Click **"Scan Media Library"** to scan all uploaded images
 4. View the results:
@@ -124,7 +124,7 @@ A comprehensive WordPress plugin for managing and auditing alt-text across your 
 
 ### Dedicated Alt Text Manager
 
-1. Go to **Media > Alt Text Manager** in your WordPress admin
+1. Go to **Media > Alt Text Auditor** in your WordPress admin and select the **Manager** tab
 2. View all your media library images with thumbnails
 3. Use the filters to find specific images:
 
@@ -165,7 +165,7 @@ For WordPress Multisite installations, network administrators have additional ca
 wp-alttext-auditor/
 ├── wp-alttext-auditor.php              # Main plugin file with activation hooks
 ├── includes/
-│   ├── admin-page.php                  # Alt Text Manager page template
+│   ├── admin-page.php                  # Alt Text Manager tab template
 │   ├── audit-dashboard-page.php        # Audit dashboard page template
 │   ├── network-dashboard-page.php      # Network admin dashboard (multisite)
 │   ├── network-settings-page.php       # Network settings page (multisite)

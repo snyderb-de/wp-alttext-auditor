@@ -3,7 +3,7 @@
  * Plugin Name: Alt Text Auditor
  * Plugin URI: https://github.com/snyderb-de/alt-text-auditor
  * Description: A comprehensive WordPress plugin for managing and auditing alt-text across your entire site with inline editing and powerful audit dashboard. Supports both single-site and multisite installations.
- * Version: 2.0.0
+ * Version: 2.1.0
  * Requires at least: 5.0
  * Requires PHP: 7.4
  * Author: Bryan Snyder (snyderb-de@gmail.com)
@@ -19,13 +19,25 @@ if (!defined('ABSPATH')) {
 
 // Define plugin constants
 if (!defined('ALTTEXT_AUDITOR_VERSION')) {
-    define('ALTTEXT_AUDITOR_VERSION', '2.0.0');
+    define('ALTTEXT_AUDITOR_VERSION', '2.1.0');
 }
 if (!defined('ALTTEXT_AUDITOR_PLUGIN_DIR')) {
     define('ALTTEXT_AUDITOR_PLUGIN_DIR', plugin_dir_path(__FILE__));
 }
 if (!defined('ALTTEXT_AUDITOR_PLUGIN_URL')) {
     define('ALTTEXT_AUDITOR_PLUGIN_URL', plugin_dir_url(__FILE__));
+}
+
+if (!function_exists('alttext_auditor_log')) {
+    /**
+     * Plugin logging hook for optional debug output.
+     *
+     * @param string $message Log message.
+     * @param array  $context Optional context data.
+     */
+    function alttext_auditor_log($message, $context = array()) {
+        do_action('alttext_auditor_log', $message, $context);
+    }
 }
 
 // Main plugin class
@@ -41,6 +53,7 @@ class WP_AltText_Updater {
 
         // Initialize admin functionality
         if (is_admin()) {
+            add_action('admin_init', array($this, 'maybe_redirect_legacy_admin_pages'));
             add_action('admin_menu', array($this, 'add_admin_menu'));
 
             // Add network admin menu if multisite
@@ -109,26 +122,40 @@ class WP_AltText_Updater {
     }
 
     /**
-     * Add admin menu for Alt Text Manager
+     * Add admin menu for Alt Text Auditor
      */
     public function add_admin_menu() {
-        // Alt Text Manager page
         add_media_page(
-            __('Alt Text Manager', 'alt-text-auditor'),
-            __('Alt Text Manager', 'alt-text-auditor'),
+            __('Alt Text Auditor', 'alt-text-auditor'),
+            __('Alt Text Auditor', 'alt-text-auditor'),
             'upload_files',
-            'alt-text-auditor-manager',
+            'alt-text-auditor',
             array($this, 'render_admin_page')
         );
+    }
 
-        // Alt-Text Audit Dashboard page
-        add_media_page(
-            __('Alt-Text Audit', 'alt-text-auditor'),
-            __('Alt-Text Audit', 'alt-text-auditor'),
-            'manage_options',
-            'alt-text-auditor-audit',
-            array($this, 'render_audit_dashboard')
-        );
+    /**
+     * Redirect legacy admin pages to the unified UI
+     */
+    public function maybe_redirect_legacy_admin_pages() {
+        if (wp_doing_ajax()) {
+            return;
+        }
+
+        if (!isset($_GET['page'])) {
+            return;
+        }
+
+        $page = sanitize_text_field($_GET['page']);
+        if ($page === 'alt-text-auditor-manager') {
+            wp_safe_redirect(admin_url('admin.php?page=alt-text-auditor&view=manager'));
+            exit;
+        }
+
+        if ($page === 'alt-text-auditor-audit') {
+            wp_safe_redirect(admin_url('admin.php?page=alt-text-auditor&view=audit'));
+            exit;
+        }
     }
 
     /**
@@ -156,14 +183,57 @@ class WP_AltText_Updater {
     }
 
     /**
-     * Render the admin page
+     * Render the unified admin page
      */
     public function render_admin_page() {
         if (!current_user_can('upload_files')) {
             wp_die(__('You do not have sufficient permissions to access this page.'));
         }
 
-        include ALTTEXT_AUDITOR_PLUGIN_DIR . 'includes/admin-page.php';
+        $view = isset($_GET['view']) ? sanitize_text_field($_GET['view']) : 'manager';
+        $view = in_array($view, array('manager', 'audit'), true) ? $view : 'manager';
+        if ($view === 'audit' && !current_user_can('manage_options')) {
+            $view = 'manager';
+        }
+
+        $show_audit_notice = false;
+        if ($view === 'audit' && !current_user_can('manage_options')) {
+            $view = 'manager';
+            $show_audit_notice = true;
+        }
+
+        $base_url = admin_url('admin.php?page=alt-text-auditor');
+        $manager_url = add_query_arg('view', 'manager', $base_url);
+        $audit_url = add_query_arg('view', 'audit', $base_url);
+        ?>
+        <div class="wrap">
+            <h1 class="wp-heading-inline"><?php echo esc_html(get_admin_page_title()); ?></h1>
+            <hr class="wp-header-end">
+
+            <nav class="nav-tab-wrapper wp-clearfix">
+                <a href="<?php echo esc_url($manager_url); ?>" class="nav-tab <?php echo ($view === 'manager') ? 'nav-tab-active' : ''; ?>">
+                    <?php echo esc_html__('Manager', 'alt-text-auditor'); ?>
+                </a>
+                <a href="<?php echo esc_url($audit_url); ?>" class="nav-tab <?php echo ($view === 'audit') ? 'nav-tab-active' : ''; ?>">
+                    <?php echo esc_html__('Audit', 'alt-text-auditor'); ?>
+                </a>
+            </nav>
+
+            <?php if ($show_audit_notice) : ?>
+                <div class="notice notice-warning">
+                    <p><?php echo esc_html__('You do not have permission to access the Audit dashboard. Showing Manager instead.', 'alt-text-auditor'); ?></p>
+                </div>
+            <?php endif; ?>
+
+            <?php
+            if ($view === 'audit') {
+                $this->render_audit_dashboard();
+            } else {
+                include ALTTEXT_AUDITOR_PLUGIN_DIR . 'includes/admin-page.php';
+            }
+            ?>
+        </div>
+        <?php
     }
 
     /**
@@ -409,13 +479,16 @@ class WP_AltText_Updater {
      * - Separate assets for different pages to reduce payload
      */
     public function enqueue_admin_scripts($hook) {
-        // Only load on media library page, alt text manager page, and audit dashboard
-        if ($hook !== 'upload.php' && $hook !== 'media_page_alt-text-auditor-manager' && $hook !== 'media_page_alt-text-auditor-audit') {
+        // Only load on media library page and unified admin page
+        if ($hook !== 'upload.php' && $hook !== 'media_page_alt-text-auditor') {
             return;
         }
 
-        // Load admin JS only on media library and alt text manager pages
-        if ($hook === 'upload.php' || $hook === 'media_page_alt-text-auditor-manager') {
+        $view = isset($_GET['view']) ? sanitize_text_field($_GET['view']) : 'manager';
+        $view = in_array($view, array('manager', 'audit'), true) ? $view : 'manager';
+
+        // Load admin JS only on media library and manager tab
+        if ($hook === 'upload.php' || ($hook === 'media_page_alt-text-auditor' && $view === 'manager')) {
             wp_enqueue_script(
                 'wp-alttext-updater-admin',
                 ALTTEXT_AUDITOR_PLUGIN_URL . 'assets/js/admin.js',
@@ -432,8 +505,8 @@ class WP_AltText_Updater {
             );
         }
 
-        // Enqueue audit dashboard assets only on audit page
-        if ($hook === 'media_page_alt-text-auditor-audit') {
+        // Enqueue audit dashboard assets only on audit tab
+        if ($hook === 'media_page_alt-text-auditor' && $view === 'audit') {
             wp_enqueue_script(
                 'wp-alttext-updater-audit-dashboard',
                 ALTTEXT_AUDITOR_PLUGIN_URL . 'assets/js/audit-dashboard.js',
@@ -450,8 +523,10 @@ class WP_AltText_Updater {
             );
         }
 
-        // Localize script for AJAX - use appropriate script handle based on page
-        $script_handle = ($hook === 'media_page_alt-text-auditor-audit') ? 'wp-alttext-updater-audit-dashboard' : 'wp-alttext-updater-admin';
+        // Localize script for AJAX - use appropriate script handle based on view
+        $script_handle = ($hook === 'media_page_alt-text-auditor' && $view === 'audit')
+            ? 'wp-alttext-updater-audit-dashboard'
+            : 'wp-alttext-updater-admin';
 
         wp_localize_script($script_handle, 'altTextAuditor', array(
             'ajax_url' => admin_url('admin-ajax.php'),
@@ -483,6 +558,13 @@ class WP_AltText_Updater {
         
         $attachment_id = intval($_POST['attachment_id']);
         $alt_text = sanitize_text_field($_POST['alt_text']);
+
+        // Enforce max alt-text length (WordPress standard is 255 characters)
+        if (strlen($alt_text) > 255) {
+            wp_send_json_error(array(
+                'message' => __('Alt-text must be 255 characters or less.', 'alt-text-auditor')
+            ));
+        }
         
         // Verify the attachment exists and user can edit it
         $attachment = get_post($attachment_id);

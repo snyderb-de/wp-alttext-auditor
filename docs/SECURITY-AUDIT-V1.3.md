@@ -7,6 +7,22 @@
 
 ---
 
+## ✅ Update (2026-02-12) - Fixes Implemented
+
+The following audit items have been fixed in current code (v1.3.2):
+
+1. **Post Content Modification Without Author Check** - Fixed by enforcing `current_user_can('edit_post', $result->content_id)` before any HTML modification in `ajax_update_audit_record`.
+2. **HTML Injection via Alt-Text in Post Content** - Fixed by escaping alt-text with `esc_attr()` before `setAttribute('alt', ...)`.
+3. **Missing Input Length Validation on Alt-Text** - Fixed by enforcing a 255-character maximum for alt-text in `ajax_update_audit_record` and `ajax_update_alt_text`.
+4. **Site Switching Without Capability Re-Check** - Fixed by re-checking `current_user_can('manage_options')` after `switch_to_blog()` in `includes/network-dashboard-page.php`.
+
+Items still open from this audit:
+- Race condition in HTML updates (optimistic locking/warnings)
+- Network dashboard pagination/caching for large multisite networks
+- Low-priority network settings sanitation
+
+---
+
 ## Executive Summary
 
 Conducted comprehensive security audit of the WP Alt Text Auditor plugin following addition of:

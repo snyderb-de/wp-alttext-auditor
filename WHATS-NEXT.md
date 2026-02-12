@@ -2,14 +2,22 @@
 
 ## ✅ COMPLETED (Just Committed)
 
-All critical and high-priority Plugin Check issues have been resolved:
+Most critical and high-priority Plugin Check issues have been resolved:
 - Text domain consistency fixed
-- Hidden files removed
+- Hidden files removed from working tree
 - Readme.txt updated (Tested up to: 6.9, tags reduced)
-- Debug code removed
 - Security audit files organized
 
+Remaining from that batch: none. (Debug `error_log()` calls replaced with `alttext_auditor_log()` hook.)
+
 **Commit**: `aa63c25` - "WordPress.org submission prep: Fix critical Plugin Check issues"
+
+## ✅ RECENT UPDATES (2026-02-12)
+
+- v1.3 security audit fixes verified in code (capability check, alt-text escaping, alt-text length validation, multisite capability re-check)
+- Added alt-text length validation to media library AJAX save handler
+- Added `.distignore` to exclude `.claude/`, `docs/`, and other non-distribution files
+- Removed `.DS_Store` files from the working tree
 
 ---
 
@@ -30,11 +38,11 @@ Add context for translators on the most important strings:
 
 ```php
 // Before
-__('Missing Alt-Text', 'wp-alttext-auditor');
+__('Missing Alt-Text', 'alt-text-auditor');
 
 // After
 /* translators: Tab label showing images without alt text */
-__('Missing Alt-Text', 'wp-alttext-auditor');
+__('Missing Alt-Text', 'alt-text-auditor');
 ```
 
 **Where to focus**:

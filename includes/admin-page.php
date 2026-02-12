@@ -23,14 +23,15 @@ $total_items = $media_query->found_posts;
 $total_pages = ceil($total_items / $per_page);
 ?>
 
-<div class="wrap">
-    <h1><?php _e('Alt Text Manager', 'alt-text-auditor'); ?></h1>
+<div class="alttext-manager-content">
+    <h2><?php _e('Alt Text Manager', 'alt-text-auditor'); ?></h2>
     <p class="description" style="margin-bottom: 0;"><?php _e('Manage alt-text for your media library images. Changes are saved automatically when you modify the alt-text field.', 'alt-text-auditor'); ?></p>
 
     <!-- Filter and Search Form -->
     <div class="alttext-manager-filters">
         <form method="get" action="">
-            <input type="hidden" name="page" value="alt-text-auditor-manager" />
+            <input type="hidden" name="page" value="alt-text-auditor" />
+            <input type="hidden" name="view" value="manager" />
 
             <div class="alttext-filter-row">
                 <div class="alttext-filter-item">
@@ -50,7 +51,7 @@ $total_pages = ceil($total_items / $per_page);
                 <div class="alttext-filter-item">
                     <button type="submit" class="button"><?php _e('Apply Filters', 'alt-text-auditor'); ?></button>
                     <?php if ($alt_status !== 'all' || !empty($search)) : ?>
-                        <a href="<?php echo esc_url(admin_url('admin.php?page=alt-text-auditor-manager')); ?>" class="button"><?php _e('Reset', 'alt-text-auditor'); ?></a>
+                        <a href="<?php echo esc_url(admin_url('admin.php?page=alt-text-auditor&view=manager')); ?>" class="button"><?php _e('Reset', 'alt-text-auditor'); ?></a>
                     <?php endif; ?>
                 </div>
             </div>
@@ -149,7 +150,8 @@ $total_pages = ceil($total_items / $per_page);
                 <div class="tablenav-pages">
                     <?php
                     $pagination_base_args = array(
-                        'page' => 'alt-text-auditor-manager'
+                        'page' => 'alt-text-auditor',
+                        'view' => 'manager'
                     );
                     if ($alt_status !== 'all') {
                         $pagination_base_args['alt_status'] = $alt_status;

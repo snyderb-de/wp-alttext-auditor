@@ -104,7 +104,7 @@ $sites = get_sites(array('number' => 1000)); // Get up to 1000 sites
                         <?php endif; ?>
                     </td>
                     <td>
-                        <a href="<?php echo esc_url(get_admin_url($site->blog_id, 'upload.php?page=alt-text-auditor-audit')); ?>" class="button">
+                        <a href="<?php echo esc_url(get_admin_url($site->blog_id, 'upload.php?page=alt-text-auditor&view=audit')); ?>" class="button">
                             <?php echo esc_html__('View Dashboard', 'alt-text-auditor'); ?>
                         </a>
                     </td>

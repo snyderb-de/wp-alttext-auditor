@@ -4,7 +4,7 @@ Tags: alt-text, accessibility, media, wcag, multisite
 Requires at least: 5.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.0.0
+Stable tag: 2.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -33,7 +33,7 @@ Alt Text Auditor helps you identify and fix images with missing alt-text across 
 
 1. Upload the `wp-alttext-auditor` folder to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Navigate to **Media > Alt-Text Audit** to run your first scan
+3. Navigate to **Media > Alt Text Auditor** and select the **Audit** tab to run your first scan
 4. Use **Media > Library** for quick inline editing in the media library
 
 **Multisite (Network) Installation:**
@@ -42,7 +42,7 @@ Alt Text Auditor helps you identify and fix images with missing alt-text across 
 2. **Network Activate** the plugin through the 'Network Admin > Plugins' menu
 3. Database tables will be automatically created for all sites in the network
 4. Network admins can view network-wide statistics at **Network Admin > Alt-Text Audit**
-5. Site admins can manage their site's alt-text at **Media > Alt-Text Audit** on each site
+5. Site admins can manage their site's alt-text at **Media > Alt Text Auditor** on each site
 
 == Frequently Asked Questions ==
 
@@ -60,7 +60,26 @@ Yes! Click "Export to CSV" to download all filtered results. The export respects
 
 = Is the plugin translation-ready? =
 
-Yes! All text is internationalized and ready for translation. The text domain is `wp-alttext-auditor`.
+Yes! All text is internationalized and ready for translation. The text domain is `alt-text-auditor`.
+
+= How do I enable debug logging? =
+
+For development, you can hook into the `alttext_auditor_log` action. Add this to a small mu-plugin:
+
+```
+add_action('alttext_auditor_log', function ($message, $context = array()) {
+    if (defined('WP_DEBUG') && WP_DEBUG && defined('WP_DEBUG_LOG') && WP_DEBUG_LOG) {
+        $suffix = $context ? ' ' . wp_json_encode($context) : '';
+        error_log('[Alt Text Auditor] ' . $message . $suffix);
+    }
+}, 10, 2);
+```
+
+= How do I update the plugin safely? =
+
+If you want to keep old data, do not delete the plugin — just update it. Upload the new ZIP and let WordPress replace the existing `wp-alttext-auditor` plugin in place (Plugins > Add New > Upload Plugin). This preserves your audit data.
+
+**Important:** Do not click **Delete** on the old plugin before updating. Deleting runs `uninstall.php` and removes the audit data table.
 
 = What permissions are required? =
 
@@ -82,6 +101,14 @@ Yes! The plugin has full multisite support with network activation, per-site dat
 6. CSV export with all filtered results
 
 == Changelog ==
+
+= 2.1.0 =
+*Release Date: February 12th, 2026*
+
+* NEW: Unified Media menu into a single **Alt Text Auditor** page with Manager and Audit tabs
+* CHANGED: Legacy Manager/Audit URLs now redirect to the unified page
+* CHANGED: Audit filters and links updated to use the new unified page path
+* DEV: Replaced direct error_log usage with `alttext_auditor_log()` hook for optional debug logging
 
 = 2.0.0 =
 *Release Date: January 30th, 2026*

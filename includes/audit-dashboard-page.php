@@ -20,17 +20,11 @@ $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'overvi
 $tabs = $this->get_tabs($current_tab);
 ?>
 
-<div class="wrap audit-dashboard-wrap">
-    <h1 class="wp-heading-inline">
-        <?php echo esc_html(get_admin_page_title()); ?>
-    </h1>
-
-    <hr class="wp-header-end">
-
+<div class="audit-dashboard-wrap">
     <!-- Tab Navigation -->
     <nav class="nav-tab-wrapper wp-clearfix audit-dashboard-tabs">
         <?php foreach ($tabs as $tab_key => $tab_data) : ?>
-            <a href="<?php echo esc_url(add_query_arg('tab', $tab_key, admin_url('admin.php?page=alt-text-auditor-audit'))); ?>"
+            <a href="<?php echo esc_url(add_query_arg('tab', $tab_key, admin_url('admin.php?page=alt-text-auditor&view=audit'))); ?>"
                class="nav-tab <?php echo $tab_data['active'] ? 'nav-tab-active' : ''; ?>">
                 <?php echo esc_html($tab_data['title']); ?>
             </a>

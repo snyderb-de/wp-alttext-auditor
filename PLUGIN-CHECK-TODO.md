@@ -17,12 +17,14 @@
 - `includes/admin-page.php`
 - `includes/class-user-attribution.php`
 
-**Action**: Find/replace all instances of `'wp-alttext-updater'` with `'wp-alttext-auditor'`
+**Action**: Find/replace all instances of `'wp-alttext-updater'` with `'alt-text-auditor'`
+**Status**: ✅ Fixed in codebase (text domain now `alt-text-auditor`). Re-run Plugin Check to confirm.
 
 ### 2. Hidden Files in Package
 **Issue**: `.DS_Store` files detected (macOS system files)
 **Impact**: Unprofessional, adds unnecessary bloat
 **Action**: Remove all `.DS_Store` files and add to `.gitignore`
+**Status**: ✅ Removed from working tree; `.DS_Store` already in `.gitignore`. Note: `.git` artifacts are not part of distribution.
 
 ```bash
 find . -name ".DS_Store" -delete
@@ -33,16 +35,19 @@ echo ".DS_Store" >> .gitignore
 **Issue**: Shows 6.7, current WordPress is 6.9
 **Impact**: Signals plugin may not be compatible with latest WordPress
 **Action**: Update to `Tested up to: 6.9` after testing
+**Status**: ✅ Updated in `readme.txt` (6.9). Still needs actual testing on WP 6.9.
 
 ### 4. AI Instruction Directory Detected
 **Issue**: `.claude/` directory present in plugin package
 **Impact**: Exposes development artifacts, bloats package
 **Action**: Remove from distribution package, add to `.gitignore`
+**Status**: ✅ Excluded via `.distignore` and already in `.gitignore`.
 
 ### 5. Unexpected Markdown Files
 **Files**: `SECURITY-AUDIT.md`, `SECURITY-AUDIT-V1.3.md`
 **Impact**: Non-standard files increase package size
 **Action**: Move to `/docs` directory or remove from distribution
+**Status**: ✅ Located in `/docs` and excluded via `.distignore`.
 
 ---
 
@@ -61,11 +66,13 @@ echo ".DS_Store" >> .gitignore
 ```
 Tags: alt-text, accessibility, media, wcag, multisite
 ```
+**Status**: ✅ Fixed in `readme.txt` (5 tags).
 
 ### 8. Debug Code in Production
-**Issue**: Multiple `error_log()` calls in `wp-alttext-auditor.php`
-**Lines**: 2182, 2206, 2230, 2234
+**Issue**: Remaining `error_log()` calls in production code
+**Files**: `includes/class-scan-manager.php`, `includes/class-html-report.php`
 **Action**: Remove or wrap in `WP_DEBUG` conditional
+**Status**: ✅ Removed direct `error_log()` calls; replaced with `alttext_auditor_log()` hook.
 
 ```php
 if (defined('WP_DEBUG') && WP_DEBUG) {
@@ -79,11 +86,11 @@ if (defined('WP_DEBUG') && WP_DEBUG) {
 **Example Fix**:
 ```php
 // Before
-__('Missing Alt-Text', 'wp-alttext-auditor');
+__('Missing Alt-Text', 'alt-text-auditor');
 
 // After
 /* translators: Tab label for images without alt text */
-__('Missing Alt-Text', 'wp-alttext-auditor');
+__('Missing Alt-Text', 'alt-text-auditor');
 ```
 
 ### 10. Unordered Placeholders in Translations
@@ -170,9 +177,9 @@ $filename = isset($parsed['path']) ? basename($parsed['path']) : '';
 
 ## Recommended Fix Order
 
-1. **Text domain consistency** (critical for i18n)
-2. **Remove hidden/dev files** (.DS_Store, .claude/, security audits)
-3. **Update readme.txt** (tested up to, tags)
+1. **Text domain consistency** (critical for i18n) ✅
+2. **Remove hidden/dev files** (.DS_Store, .claude/, security audits) ✅
+3. **Update readme.txt** (tested up to, tags) ✅ (version updated; testing still required)
 4. **Remove debug code** (error_log calls)
 5. **Add translator comments** (top 20 most important strings)
 6. **Fix unordered placeholders** (8 instances)
@@ -183,12 +190,12 @@ $filename = isset($parsed['path']) ? basename($parsed['path']) : '';
 
 ## Quick Wins (Fix in <30 min)
 
-- Remove `.DS_Store` files
-- Remove `.claude/` directory from package
-- Move/remove security audit markdown files
-- Update readme.txt tested version
+- Remove `.DS_Store` files ✅
+- Remove `.claude/` directory from package ✅ (excluded via `.distignore`)
+- Move/remove security audit markdown files ✅ (in `/docs`, excluded via `.distignore`)
+- Update readme.txt tested version ✅ (version updated; testing still required)
 - Remove `error_log()` calls
-- Reduce tags to 5
+- Reduce tags to 5 ✅
 
 ---
 
@@ -203,13 +210,13 @@ $filename = isset($parsed['path']) ? basename($parsed['path']) : '';
 
 ## Submission Checklist
 
-- [ ] All text domains use `wp-alttext-auditor`
-- [ ] No hidden files (.DS_Store)
-- [ ] No dev artifacts (.claude/)
-- [ ] Readme.txt tested up to 6.9
-- [ ] Readme.txt tags reduced to 5
-- [ ] No debug code (error_log)
-- [ ] Security audit markdown files removed/moved
+- [x] All text domains use `alt-text-auditor`
+- [x] No hidden files (.DS_Store) in distribution package
+- [x] No dev artifacts (.claude/) in distribution package
+- [ ] Readme.txt tested up to 6.9 (version updated; testing still required)
+- [x] Readme.txt tags reduced to 5
+- [x] No debug code (error_log)
+- [x] Security audit markdown files removed/moved (in `/docs`, excluded)
 - [ ] Test plugin on WordPress 6.9
 - [ ] Test plugin with PHP 7.4 and 8.2
 - [ ] Run Plugin Check again after fixes

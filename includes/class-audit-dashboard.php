@@ -501,7 +501,8 @@ class WP_AltText_Audit_Dashboard {
             <!-- Filter Form -->
             <div class="audit-filters">
                 <form method="get" class="audit-filter-form" id="audit-filter-form">
-                    <input type="hidden" name="page" value="alt-text-auditor-audit">
+                    <input type="hidden" name="page" value="alt-text-auditor">
+                    <input type="hidden" name="view" value="audit">
                     <input type="hidden" name="tab" value="missing">
 
                     <select name="filter_user" id="filter-user">
@@ -541,7 +542,7 @@ class WP_AltText_Audit_Dashboard {
                     <button type="submit" class="button" title="<?php esc_attr_e('Apply the selected filters to narrow down results', 'alt-text-auditor'); ?>"><?php _e('Apply Filters', 'alt-text-auditor'); ?></button>
 
                     <?php if ($filter_user || $filter_content_type || $filter_post_type || $filter_search) : ?>
-                        <a href="<?php echo esc_url(admin_url('admin.php?page=alt-text-auditor-audit&tab=missing')); ?>"
+                        <a href="<?php echo esc_url(admin_url('admin.php?page=alt-text-auditor&view=audit&tab=missing')); ?>"
                            class="button" id="reset-filters" title="<?php esc_attr_e('Clear all filters and show all results', 'alt-text-auditor'); ?>">
                             <?php _e('Reset Filters', 'alt-text-auditor'); ?>
                         </a>
