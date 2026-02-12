@@ -156,7 +156,7 @@ class WP_AltText_Audit_Dashboard {
     public function render_settings_tab() {
         $cron_enabled = get_option('alttext_audit_cron_enabled', 0);
         $next_scan = wp_next_scheduled('alttext_audit_cron_scan');
-        $cleanup_days = get_option('alttext_auto_cleanup_days', 'never');
+        $cleanup_days = get_option('alttext_auto_cleanup_days', '365');
         $report_retention = absint(get_option('alttext_report_retention_count', 20));
         if ($report_retention < 1) {
             $report_retention = 1;

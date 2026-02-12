@@ -230,7 +230,7 @@ class WP_AltText_Scan_Manager {
      * Deletes scans older than the configured number of days
      */
     public function auto_cleanup_by_age() {
-        $cleanup_days = get_option('alttext_auto_cleanup_days', 'never');
+        $cleanup_days = get_option('alttext_auto_cleanup_days', '365');
 
         if ($cleanup_days === 'never') {
             return;

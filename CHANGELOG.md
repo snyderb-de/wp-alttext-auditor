@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.1.5 - 2026-02-12
+- Changed default auto-cleanup to keep reports and scans for 1 year.
+
 ## 2.1.4 - 2026-02-12
 - Moved the Settings tab to the top-level navigation (alongside Manager and Audit).
 
