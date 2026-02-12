@@ -77,7 +77,10 @@ add_action('alttext_auditor_log', function ($message, $context = array()) {
 
 = How do I update the plugin safely? =
 
-If you want to keep old data, do not delete the plugin — just update it. Upload the new ZIP and let WordPress replace the existing `wp-alttext-auditor` plugin in place (Plugins > Add New > Upload Plugin). This preserves your audit data.
+If you want to keep old data, do not delete the plugin — just update it.
+
+* If you are on v2.0.0+ (folder: `alt-text-auditor`), upload the new ZIP and let WordPress replace the existing plugin in place (Plugins > Add New > Upload Plugin). This preserves your audit data.
+* If you are on v1.x (folder: `wp-alttext-auditor`), deactivate the old plugin and remove the folder manually (FTP/SSH or file manager). Do not click **Delete** in wp-admin (that runs `uninstall.php` and removes data). Then upload the new ZIP.
 
 **Important:** Do not click **Delete** on the old plugin before updating. Deleting runs `uninstall.php` and removes the audit data table.
 
