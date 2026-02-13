@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.2.0 - 2026-02-13
+- Fixed scan report table dates not matching site timezone (#5).
+- Fixed dashboard statistics showing incorrect "last scan" times (#4).
+- Replaced all deprecated `current_time('mysql')` and `current_time('timestamp')` calls with `wp_date()` and `time()`.
+- Enabled inline alt-text editing for images without attachment IDs (#1).
+- Added thumbnail fallback using image src URL for non-attachment images.
+- External images with no post context now show "External image - edit manually" hint.
+
 ## 2.1.7 - 2026-02-12
 - Updated warning styling to default to black and turn red at thresholds.
 

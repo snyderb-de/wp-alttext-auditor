@@ -4,7 +4,7 @@ Tags: alt-text, accessibility, media, wcag, multisite
 Requires at least: 5.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.1.7
+Stable tag: 2.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -104,6 +104,15 @@ Yes! The plugin has full multisite support with network activation, per-site dat
 6. CSV export with all filtered results
 
 == Changelog ==
+
+= 2.2.0 =
+*Release Date: February 13th, 2026*
+
+* FIXED: Scan report dates now correctly respect site timezone (replaced deprecated current_time() with wp_date() and time())
+* FIXED: Dashboard statistics "last scan" display now uses correct timezone-aware dates
+* NEW: Images without attachment IDs can now be edited inline from the Audit Dashboard
+* NEW: Thumbnail fallback uses image src URL when no media library attachment exists
+* CHANGED: Only truly external images with no post context show "edit manually" hint
 
 = 2.1.7 =
 *Release Date: February 12th, 2026*
