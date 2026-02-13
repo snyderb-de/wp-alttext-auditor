@@ -695,6 +695,9 @@ class WP_AltText_Audit_Dashboard {
                             $thumbnail_url = '';
                             if ($result->attachment_id) {
                                 $thumbnail_url = wp_get_attachment_image_url($result->attachment_id, 'thumbnail');
+                            } elseif ($result->image_source) {
+                                // Fallback to image src URL for images without attachment ID
+                                $thumbnail_url = $result->image_source;
                             }
                             ?>
                             <tr>
@@ -723,15 +726,18 @@ class WP_AltText_Audit_Dashboard {
                                     <?php echo esc_html($user_name); ?>
                                 </td>
                                 <td class="column-alt-text">
-                                    <?php if ($result->attachment_id) : ?>
-                                        <div class="audit-alt-text-display" data-attachment-id="<?php echo esc_attr($result->attachment_id); ?>" data-result-id="<?php echo esc_attr($result->id); ?>">
+                                        <div class="audit-alt-text-display" data-attachment-id="<?php echo esc_attr($result->attachment_id ? $result->attachment_id : 0); ?>" data-result-id="<?php echo esc_attr($result->id); ?>">
                                             <span class="audit-status no-alt">
                                                 <span class="dashicons dashicons-warning"></span>
                                                 <?php _e('Missing', 'alt-text-auditor'); ?>
                                             </span>
-                                            <button type="button" class="button button-small audit-quick-edit-trigger">
-                                                <?php _e('Add Alt Text', 'alt-text-auditor'); ?>
-                                            </button>
+                                            <?php if ($result->attachment_id || ($result->content_type === 'post_content' && $result->content_id)) : ?>
+                                                <button type="button" class="button button-small audit-quick-edit-trigger">
+                                                    <?php _e('Add Alt Text', 'alt-text-auditor'); ?>
+                                                </button>
+                                            <?php else : ?>
+                                                <br><small><em><?php _e('External image - edit manually', 'alt-text-auditor'); ?></em></small>
+                                            <?php endif; ?>
                                         </div>
                                         <div class="audit-alt-text-edit" style="display: none;">
                                             <input type="text" class="audit-quick-edit-input" placeholder="<?php esc_attr_e('Enter alt text...', 'alt-text-auditor'); ?>" maxlength="255">
@@ -743,14 +749,6 @@ class WP_AltText_Audit_Dashboard {
                                             </button>
                                             <span class="spinner"></span>
                                         </div>
-                                    <?php else : ?>
-                                        <span class="audit-status no-alt">
-                                            <span class="dashicons dashicons-warning"></span>
-                                            <?php _e('Missing', 'alt-text-auditor'); ?>
-                                        </span>
-                                        <br>
-                                        <small><em><?php _e('No attachment ID - cannot edit from here', 'alt-text-auditor'); ?></em></small>
-                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
