@@ -1,6 +1,6 @@
 # Alt Text Auditor
 
-[![Built with Claude Code](https://img.shields.io/badge/Built_with-Claude_Code_&_Vibed-8A63D2?style=flat&logo=anthropic&logoColor=white)](https://claude.ai/code)
+Built with ClaudeCode & OpenAI Codex
 
 A comprehensive WordPress plugin for managing and auditing alt-text across your entire site with inline editing and powerful audit dashboard. Supports both single-site and multisite installations.
 
