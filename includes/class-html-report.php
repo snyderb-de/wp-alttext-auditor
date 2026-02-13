@@ -95,7 +95,7 @@ class WP_AltText_HTML_Report {
      */
     private function generate_html($stats, $users, $missing_items) {
         $site_name = get_bloginfo('name');
-        $scan_date = current_time('F j, Y g:i a');
+        $scan_date = wp_date('F j, Y g:i a');
 
         ob_start();
         ?>
@@ -331,7 +331,7 @@ class WP_AltText_HTML_Report {
         }
 
         // Generate filename with timestamp
-        $filename = 'alttext-report-' . current_time('Y-m-d-His') . '.html';
+        $filename = 'alttext-report-' . wp_date('Y-m-d-His') . '.html';
         $file_path = trailingslashit($reports_dir) . $filename;
 
         // Save file
@@ -359,8 +359,8 @@ class WP_AltText_HTML_Report {
         // Add new report to beginning of array
         array_unshift($reports, array(
             'filename' => $filename,
-            'date' => current_time('mysql'),
-            'timestamp' => current_time('timestamp')
+            'date' => wp_date('Y-m-d H:i:s'),
+            'timestamp' => time()
         ));
 
         // Keep only last N reports

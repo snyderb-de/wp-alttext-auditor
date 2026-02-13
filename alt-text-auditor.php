@@ -79,7 +79,7 @@ if (!function_exists('alttext_auditor_log')) {
             return;
         }
 
-        $entry = '[' . current_time('mysql') . '] ' . (string) $message;
+        $entry = '[' . wp_date('Y-m-d H:i:s') . '] ' . (string) $message;
         if (!empty($context)) {
             $entry .= ' ' . wp_json_encode($context);
         }
@@ -729,7 +729,7 @@ class WP_AltText_Updater {
         // Clear results on first batch
         if ($batch === 0) {
             $scanner->clear_results();
-            set_transient('alttext_audit_scan_start_time', current_time('mysql'), HOUR_IN_SECONDS);
+            set_transient('alttext_audit_scan_start_time', wp_date('Y-m-d H:i:s'), HOUR_IN_SECONDS);
         }
 
         // Perform scan based on type
@@ -748,14 +748,14 @@ class WP_AltText_Updater {
             'processed' => $result['processed'],
             'total' => $result['total'],
             'percentage' => $result['percentage'],
-            'last_update' => current_time('mysql')
+            'last_update' => wp_date('Y-m-d H:i:s')
         );
         set_transient('alttext_audit_scan_progress', $progress_data, HOUR_IN_SECONDS);
 
         // If scan is complete, clear cache and update last scan time
         if (!$result['continue']) {
             delete_transient('alttext_audit_stats_cache');
-            update_option('alttext_audit_last_scan', current_time('mysql'));
+            update_option('alttext_audit_last_scan', wp_date('Y-m-d H:i:s'));
             delete_transient('alttext_audit_scan_start_time');
 
             // Generate HTML report after scan completes
@@ -1039,7 +1039,7 @@ class WP_AltText_Updater {
             array(
                 'has_alt' => 1,
                 'alt_text' => $alt_text,
-                'last_updated' => current_time('mysql')
+                'last_updated' => wp_date('Y-m-d H:i:s')
             ),
             array('id' => $result_id),
             array('%d', '%s', '%s'),
@@ -1575,7 +1575,7 @@ class WP_AltText_Updater {
         $scanner->clear_results();
 
         // Set scan start time
-        set_transient('alttext_audit_scan_start_time', current_time('mysql'), HOUR_IN_SECONDS);
+        set_transient('alttext_audit_scan_start_time', wp_date('Y-m-d H:i:s'), HOUR_IN_SECONDS);
 
         // Scan all content (posts and pages)
         $content_offset = 0;
@@ -1595,7 +1595,7 @@ class WP_AltText_Updater {
 
         // Clear cache and update last scan time
         delete_transient('alttext_audit_stats_cache');
-        update_option('alttext_audit_last_scan', current_time('mysql'));
+        update_option('alttext_audit_last_scan', wp_date('Y-m-d H:i:s'));
         delete_transient('alttext_audit_scan_start_time');
 
         // Generate HTML report
@@ -1692,7 +1692,7 @@ class WP_AltText_Updater {
 
             // Clear cache and update last scan time
             delete_transient('alttext_audit_stats_cache');
-            update_option('alttext_audit_last_scan', current_time('mysql'));
+            update_option('alttext_audit_last_scan', wp_date('Y-m-d H:i:s'));
 
             // Generate HTML report for this site
             require_once ALTTEXT_AUDITOR_PLUGIN_DIR . 'includes/class-html-report.php';

@@ -80,8 +80,8 @@ class WP_AltText_Audit_Scanner {
                         'alt_text' => $img_data['alt'],
                         'user_id' => $post->post_author,
                         'post_type' => $post->post_type,
-                        'scan_date' => current_time('mysql'),
-                        'last_updated' => current_time('mysql')
+                        'scan_date' => wp_date('Y-m-d H:i:s'),
+                        'last_updated' => wp_date('Y-m-d H:i:s')
                     );
                 }
             }
@@ -152,8 +152,8 @@ class WP_AltText_Audit_Scanner {
                         'alt_text' => $img_data['alt'],
                         'user_id' => $post->post_author,
                         'post_type' => $post->post_type,
-                        'scan_date' => current_time('mysql'),
-                        'last_updated' => current_time('mysql')
+                        'scan_date' => wp_date('Y-m-d H:i:s'),
+                        'last_updated' => wp_date('Y-m-d H:i:s')
                     );
                 }
             }
@@ -228,8 +228,8 @@ class WP_AltText_Audit_Scanner {
                     'alt_text' => $alt,
                     'user_id' => $uploader_id,
                     'post_type' => null,
-                    'scan_date' => current_time('mysql'),
-                    'last_updated' => current_time('mysql')
+                    'scan_date' => wp_date('Y-m-d H:i:s'),
+                    'last_updated' => wp_date('Y-m-d H:i:s')
                 );
             }
         }

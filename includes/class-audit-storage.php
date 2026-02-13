@@ -289,7 +289,7 @@ class WP_AltText_Audit_Storage {
             'has_percentage' => floatval($stats->has_percentage),
             'by_source' => $by_source_formatted,
             'last_scan_date' => $last_scan,
-            'last_scan_human' => $last_scan ? human_time_diff(strtotime($last_scan), current_time('timestamp')) . ' ago' : 'Never'
+            'last_scan_human' => $last_scan ? human_time_diff(strtotime($last_scan), time()) . ' ago' : 'Never'
         );
 
         // Cache for 24 hours

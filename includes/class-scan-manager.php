@@ -60,11 +60,11 @@ class WP_AltText_Scan_Manager {
         }
 
         // Generate unique scan ID
-        $scan_id = 'scan_' . current_time('timestamp') . '_' . wp_rand(1000, 9999);
+        $scan_id = 'scan_' . time() . '_' . wp_rand(1000, 9999);
 
         $scan['id'] = $scan_id;
-        $scan['date'] = current_time('mysql');
-        $scan['timestamp'] = current_time('timestamp');
+        $scan['date'] = wp_date('Y-m-d H:i:s');
+        $scan['timestamp'] = time();
         $scan['status'] = 'completed';
 
         // Get existing scans
@@ -241,7 +241,7 @@ class WP_AltText_Scan_Manager {
             return;
         }
 
-        $cutoff_timestamp = current_time('timestamp') - ($days * DAY_IN_SECONDS);
+        $cutoff_timestamp = time() - ($days * DAY_IN_SECONDS);
         $scans = $this->get_scans();
         $scan_ids_to_delete = array();
 
