@@ -100,6 +100,13 @@ class WP_AltText_Updater {
         // Load plugin text domain
         load_plugin_textdomain('alt-text-auditor', false, dirname(plugin_basename(__FILE__)) . '/languages');
 
+        // Move existing reports out of public uploads, including after plugin updates.
+        require_once ALTTEXT_AUDITOR_PLUGIN_DIR . 'includes/class-html-report.php';
+        if (!WP_AltText_HTML_Report::migrate_legacy_reports()) {
+            add_action('admin_notices', array($this, 'report_migration_notice'));
+            add_action('network_admin_notices', array($this, 'report_migration_notice'));
+        }
+
         // Initialize admin functionality
         if (is_admin()) {
             add_action('admin_init', array($this, 'maybe_redirect_legacy_admin_pages'));
@@ -111,6 +118,7 @@ class WP_AltText_Updater {
             }
 
             add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
+            add_action('admin_post_alttext_view_report', array('WP_AltText_HTML_Report', 'serve_report'));
             add_action('wp_ajax_update_alt_text', array($this, 'ajax_update_alt_text'));
             add_action('wp_ajax_alttext_audit_scan', array($this, 'ajax_audit_scan'));
             add_action('wp_ajax_alttext_audit_stats', array($this, 'ajax_audit_stats'));
@@ -659,6 +667,10 @@ class WP_AltText_Updater {
                 'message' => __('Invalid attachment', 'alt-text-auditor')
             ));
         }
+
+        if (!current_user_can('edit_post', $attachment_id)) {
+            wp_send_json_error(array('message' => __('You do not have permission to edit this attachment.', 'alt-text-auditor')), 403);
+        }
         
         // Update the alt text
         $result = update_post_meta($attachment_id, '_wp_attachment_image_alt', $alt_text);
@@ -933,6 +945,20 @@ class WP_AltText_Updater {
             ));
         }
 
+        // Authorize every affected object before writing either content or metadata.
+        $attachment = $result->attachment_id ? get_post($result->attachment_id) : null;
+        $has_attachment = $attachment && $attachment->post_type === 'attachment';
+        if ($has_attachment && !current_user_can('edit_post', $result->attachment_id)) {
+            wp_send_json_error(array('message' => __('You do not have permission to edit this attachment.', 'alt-text-auditor')), 403);
+        }
+        if (in_array($result->content_type, array('post_content', 'draft_content'), true)) {
+            if (!$result->content_id || !current_user_can('edit_post', $result->content_id)) {
+                wp_send_json_error(array('message' => __('You do not have permission to edit this post.', 'alt-text-auditor')), 403);
+            }
+        } elseif (!$has_attachment) {
+            wp_send_json_error(array('message' => __('Invalid attachment', 'alt-text-auditor')), 400);
+        }
+
         // If this is a post_content type, update the HTML in the post content
         $saved_to_post_content = false;
         if ($result->content_type === 'post_content' && $result->content_id) {
@@ -941,13 +967,6 @@ class WP_AltText_Updater {
             if (!$post) {
                 wp_send_json_error(array(
                     'message' => __('Post not found.', 'alt-text-auditor')
-                ));
-            }
-
-            // SECURITY: Check if user has permission to edit this specific post
-            if (!current_user_can('edit_post', $result->content_id)) {
-                wp_send_json_error(array(
-                    'message' => __('You do not have permission to edit this post.', 'alt-text-auditor')
                 ));
             }
 
@@ -1025,12 +1044,9 @@ class WP_AltText_Updater {
 
         // If this result has an attachment_id, update the media library too
         $saved_to_media = false;
-        if ($result->attachment_id) {
-            $attachment = get_post($result->attachment_id);
-            if ($attachment && $attachment->post_type === 'attachment') {
-                update_post_meta($result->attachment_id, '_wp_attachment_image_alt', $alt_text);
-                $saved_to_media = true;
-            }
+        if ($has_attachment) {
+            update_post_meta($result->attachment_id, '_wp_attachment_image_alt', $alt_text);
+            $saved_to_media = true;
         }
 
         // Update the audit record
@@ -1386,6 +1402,11 @@ class WP_AltText_Updater {
             wp_send_json_error(array('message' => __('Insufficient permissions', 'alt-text-auditor')), 403);
         }
 
+        require_once ALTTEXT_AUDITOR_PLUGIN_DIR . 'includes/class-html-report.php';
+        if (!WP_AltText_HTML_Report::migrate_legacy_reports()) {
+            wp_send_json_error(array('message' => __('Could not move legacy reports into private storage. Check database and uploads permissions before clearing data.', 'alt-text-auditor')), 500);
+        }
+
         // Load scan manager
         require_once ALTTEXT_AUDITOR_PLUGIN_DIR . 'includes/class-scan-manager.php';
         $scan_manager = new WP_AltText_Scan_Manager();
@@ -1400,14 +1421,9 @@ class WP_AltText_Updater {
             $deleted = $scan_manager->delete_scans($scan_ids);
         }
 
-        // Also delete any orphaned report files
-        $upload_dir = wp_upload_dir();
-        $reports_dir = trailingslashit($upload_dir['basedir']) . 'alttext-reports';
-        if (file_exists($reports_dir)) {
-            $files = glob($reports_dir . '/alttext-report-*.html');
-            foreach ($files as $file) {
-                @unlink($file);
-            }
+        // Also delete reports no longer associated with a scan.
+        if (!WP_AltText_HTML_Report::delete_all_reports()) {
+            wp_send_json_error(array('message' => __('Could not delete all reports. Check database and uploads permissions.', 'alt-text-auditor')), 500);
         }
 
         wp_send_json_success(array(
@@ -1534,7 +1550,7 @@ class WP_AltText_Updater {
         check_ajax_referer('alttext_audit_nonce', 'nonce');
 
         // Check permissions
-        if (!current_user_can('upload_files')) {
+        if (!current_user_can('manage_options')) {
             wp_send_json_error(array('message' => __('Insufficient permissions', 'alt-text-auditor')), 403);
         }
 
@@ -1544,6 +1560,15 @@ class WP_AltText_Updater {
         wp_send_json_success(array(
             'message' => __('Scan cancellation requested. The scan will stop after the current batch completes.', 'alt-text-auditor')
         ));
+    }
+
+    /**
+     * Warn administrators when legacy public reports could not be migrated.
+     */
+    public function report_migration_notice() {
+        if (current_user_can('manage_options')) {
+            echo '<div class="notice notice-error"><p>' . esc_html__('Alt Text Auditor could not move all legacy reports into private storage. Reports in uploads/alttext-reports may still be publicly readable. Check database and uploads permissions, then reload to retry.', 'alt-text-auditor') . '</p></div>';
+        }
     }
 
     /**

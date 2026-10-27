@@ -4,6 +4,14 @@ Built with ClaudeCode & OpenAI Codex
 
 A comprehensive WordPress plugin for managing and auditing alt-text across your entire site with inline editing and powerful audit dashboard. Supports both single-site and multisite installations.
 
+## Security update (unreleased)
+
+Alt-text edits now require permission to edit every affected attachment and post. Site-wide scan cancellation requires administrator permission. Manager sorting accepts only ascending or descending order and escapes its HTML attributes.
+
+Audit reports are stored privately in the site's database and served through an administrator-only WordPress endpoint. Existing report views, downloads, print controls, and retention settings remain available. On the first WordPress request after updating each site, legacy reports are copied into private storage and their public uploads files are removed. An administrator notice identifies any migration failure and retries on subsequent requests. In multisite, visit each site's dashboard after updating to complete migration across the network. Purge any cached copies of previously public report URLs at the hosting/CDN layer.
+
+The historical uploads storage descriptions below describe older releases. See [the security regression tests](tests/README.md) for local verification.
+
 ## Features
 
 ### Quick Edit (Media Library)

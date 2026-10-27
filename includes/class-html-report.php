@@ -55,7 +55,7 @@ class WP_AltText_HTML_Report {
     /**
      * Generate and save HTML report
      *
-     * @return string|false Report file path on success, false on failure
+     * @return string|false Report filename on success, false on failure
      */
     public function generate_report() {
         // Get statistics
@@ -74,7 +74,7 @@ class WP_AltText_HTML_Report {
         // Generate HTML
         $html = $this->generate_html($stats, $users, $missing_items);
 
-        // Save to uploads directory
+        // Save privately; public uploads must never contain new report HTML.
         $result = $this->save_report($html);
 
         // Log only if failed
@@ -299,7 +299,7 @@ class WP_AltText_HTML_Report {
      *
      * @return int Retention count (min 1, max 200)
      */
-    private function get_report_retention_count() {
+    private static function get_report_retention_count() {
         $count = absint(get_option('alttext_report_retention_count', 20));
         if ($count < 1) {
             $count = 1;
@@ -311,40 +311,25 @@ class WP_AltText_HTML_Report {
     }
 
     /**
-     * Save report to uploads directory
+     * Save report content in a site-scoped, non-autoloaded WordPress option.
      *
      * @param string $html HTML content
-     * @return string|false File path on success, false on failure
+     * @return string|false Filename on success, false on failure
      */
     private function save_report($html) {
-        // Get uploads directory
-        $upload_dir = wp_upload_dir();
-        $reports_dir = trailingslashit($upload_dir['basedir']) . 'alttext-reports';
-
-        // Create directory if it doesn't exist
-        if (!file_exists($reports_dir)) {
-            wp_mkdir_p($reports_dir);
-
-            // Add .htaccess to prevent direct listing
-            $htaccess = $reports_dir . '/.htaccess';
-            file_put_contents($htaccess, "Options -Indexes\n");
-        }
-
-        // Generate filename with timestamp
-        $filename = 'alttext-report-' . wp_date('Y-m-d-His') . '.html';
-        $file_path = trailingslashit($reports_dir) . $filename;
-
-        // Save file
-        $result = file_put_contents($file_path, $html);
-
-        if ($result === false) {
+        if (!self::migrate_legacy_reports()) {
             return false;
         }
-
-        // Store report info in options for dashboard access
-        $this->store_report_info($filename);
-
-        return $file_path;
+        $filename = 'alttext-report-' . wp_date('Y-m-d-His') . '-' . wp_generate_uuid4() . '.html';
+        if (!add_option(self::report_option($filename), $html, '', false)) {
+            return false;
+        }
+        if (!$this->store_report_info($filename)) {
+            delete_option(self::report_option($filename));
+            return false;
+        }
+        self::cleanup_old_reports();
+        return $filename;
     }
 
     /**
@@ -354,7 +339,6 @@ class WP_AltText_HTML_Report {
      */
     private function store_report_info($filename) {
         $reports = get_option('alttext_audit_reports', array());
-        $max_reports = $this->get_report_retention_count();
 
         // Add new report to beginning of array
         array_unshift($reports, array(
@@ -363,10 +347,8 @@ class WP_AltText_HTML_Report {
             'timestamp' => time()
         ));
 
-        // Keep only last N reports
-        $reports = array_slice($reports, 0, $max_reports);
-
         update_option('alttext_audit_reports', $reports);
+        return get_option('alttext_audit_reports', array()) === $reports;
     }
 
     /**
@@ -385,40 +367,172 @@ class WP_AltText_HTML_Report {
      * @return string Download URL
      */
     public static function get_report_url($filename) {
-        $upload_dir = wp_upload_dir();
-        $reports_url = trailingslashit($upload_dir['baseurl']) . 'alttext-reports';
-
-        return trailingslashit($reports_url) . $filename;
+        if (!self::valid_filename($filename)) {
+            return '';
+        }
+        // Return a raw URL for JSON callers; HTML callers escape at output.
+        return add_query_arg(array(
+            'action' => 'alttext_view_report',
+            'report' => $filename,
+            '_wpnonce' => wp_create_nonce(self::report_nonce_action($filename))
+        ), admin_url('admin-post.php'));
     }
 
     /**
-     * Delete old reports (keep last 20)
+     * Serve report HTML only to administrators of the current site.
+     */
+    public static function serve_report() {
+        nocache_headers();
+        header('Cache-Control: private, no-store, no-cache, must-revalidate, max-age=0');
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Insufficient permissions', 'alt-text-auditor'), '', array('response' => 403));
+        }
+        $filename = isset($_GET['report']) && is_string($_GET['report']) ? wp_unslash($_GET['report']) : '';
+        if (!self::valid_filename($filename)) {
+            wp_die(__('Report not found.', 'alt-text-auditor'), '', array('response' => 404));
+        }
+        check_admin_referer(self::report_nonce_action($filename));
+        $html = get_option(self::report_option($filename), false);
+        if (!is_string($html)) {
+            wp_die(__('Report not found.', 'alt-text-auditor'), '', array('response' => 404));
+        }
+        header('Content-Type: text/html; charset=UTF-8');
+        header('Content-Disposition: inline; filename="' . $filename . '"');
+        header('X-Content-Type-Options: nosniff');
+        header("Content-Security-Policy: default-src 'none'; img-src http: https: data:; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'");
+        // This is the plugin-generated HTML document, not user-supplied markup.
+        echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+        exit;
+    }
+
+    private static function valid_filename($filename) {
+        return is_string($filename) && preg_match('/\Aalttext-report-[a-zA-Z0-9-]+\.html\z/', $filename);
+    }
+
+    private static function report_option($filename) {
+        return 'alttext_audit_report_' . hash('sha256', $filename);
+    }
+
+    private static function report_nonce_action($filename) {
+        return 'alttext_view_report_' . get_current_blog_id() . '_' . $filename;
+    }
+
+    /**
+     * Preserve old report IDs and content, then remove their public files.
+     * Retry on failure; callers must surface the failure to administrators.
+     */
+    public static function migrate_legacy_reports() {
+        if (get_option('alttext_audit_reports_private', false)) {
+            return true;
+        }
+        $upload_dir = wp_upload_dir(null, false);
+        if (!empty($upload_dir['error']) || empty($upload_dir['basedir'])) {
+            return false;
+        }
+        $reports_dir = trailingslashit($upload_dir['basedir']) . 'alttext-reports';
+        if (is_link($reports_dir)) {
+            return false;
+        }
+        $files = is_dir($reports_dir) ? glob($reports_dir . '/alttext-report-*.html') : array();
+        if ($files === false) {
+            return false;
+        }
+        $reports = self::get_available_reports();
+        $known = array_column($reports, 'filename');
+        $migrated = array();
+        $success = true;
+        foreach ($files as $file) {
+            $filename = basename($file);
+            if (!self::valid_filename($filename) || is_link($file) || !is_file($file)) {
+                $success = false;
+                continue;
+            }
+            $html = @file_get_contents($file);
+            if ($html === false) {
+                $success = false;
+                continue;
+            }
+            $option = self::report_option($filename);
+            if (get_option($option, false) !== $html && !add_option($option, $html, '', false)) {
+                $success = false;
+                continue;
+            }
+            if (!in_array($filename, $known, true)) {
+                $timestamp = filemtime($file);
+                $reports[] = array('filename' => $filename, 'date' => wp_date('Y-m-d H:i:s', $timestamp), 'timestamp' => $timestamp);
+                $known[] = $filename;
+            }
+            $migrated[] = $file;
+        }
+        usort($reports, function($a, $b) {
+            return $b['timestamp'] <=> $a['timestamp'];
+        });
+        update_option('alttext_audit_reports', $reports);
+        if (get_option('alttext_audit_reports', array()) !== $reports) {
+            return false;
+        }
+        foreach ($migrated as $file) {
+            if (!@unlink($file)) {
+                $success = false;
+            }
+        }
+        if ($success) {
+            update_option('alttext_audit_reports_private', 1);
+            self::cleanup_old_reports();
+        }
+        return $success;
+    }
+
+    /**
+     * Delete private report content and remove its dashboard entry.
+     */
+    public static function delete_report($filename) {
+        if (!self::valid_filename($filename)) {
+            return false;
+        }
+        // Keep the private backup and scan reference if a legacy public copy
+        // cannot be removed after a failed migration.
+        $upload_dir = wp_upload_dir(null, false);
+        if (!empty($upload_dir['error']) || empty($upload_dir['basedir'])) {
+            return false;
+        }
+        $file = trailingslashit($upload_dir['basedir']) . 'alttext-reports/' . $filename;
+        if ((file_exists($file) || is_link($file)) && !@unlink($file)) {
+            return false;
+        }
+        $option = self::report_option($filename);
+        delete_option($option);
+        if (get_option($option, false) !== false) {
+            return false;
+        }
+        $reports = array_filter(self::get_available_reports(), function($report) use ($filename) {
+            return $report['filename'] !== $filename;
+        });
+        $reports = array_values($reports);
+        update_option('alttext_audit_reports', $reports);
+        return get_option('alttext_audit_reports', array()) === $reports;
+    }
+
+    public static function delete_all_reports() {
+        // Include old files so clearing data also clears reports from older versions.
+        if (!self::migrate_legacy_reports()) {
+            return false;
+        }
+        foreach (self::get_available_reports() as $report) {
+            if (!self::delete_report($report['filename'])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Keep the configured number of reports without orphaning private content.
      */
     public static function cleanup_old_reports() {
-        $upload_dir = wp_upload_dir();
-        $reports_dir = trailingslashit($upload_dir['basedir']) . 'alttext-reports';
-
-        if (!file_exists($reports_dir)) {
-            return;
-        }
-
-        $files = glob($reports_dir . '/alttext-report-*.html');
-        $max_reports = absint(get_option('alttext_report_retention_count', 20));
-        if ($max_reports < 1) {
-            $max_reports = 1;
-        } elseif ($max_reports > 200) {
-            $max_reports = 200;
-        }
-
-        // Sort by modification time, newest first
-        usort($files, function($a, $b) {
-            return filemtime($b) - filemtime($a);
-        });
-
-        // Delete all except the newest N
-        $files_to_delete = array_slice($files, $max_reports);
-        foreach ($files_to_delete as $file) {
-            @unlink($file);
+        $reports = self::get_available_reports();
+        foreach (array_slice($reports, self::get_report_retention_count()) as $report) {
+            self::delete_report($report['filename']);
         }
     }
 }

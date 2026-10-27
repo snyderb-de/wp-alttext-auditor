@@ -12,7 +12,8 @@ $per_page = 20;
 $alt_status = isset($_GET['alt_status']) ? sanitize_text_field($_GET['alt_status']) : 'all';
 $search = isset($_GET['s']) ? sanitize_text_field($_GET['s']) : '';
 $orderby = isset($_GET['orderby']) ? sanitize_text_field($_GET['orderby']) : 'date';
-$order = isset($_GET['order']) ? sanitize_text_field($_GET['order']) : 'DESC';
+$order = isset($_GET['order']) && is_string($_GET['order']) ? strtoupper(wp_unslash($_GET['order'])) : 'DESC';
+$order = in_array($order, array('ASC', 'DESC'), true) ? $order : 'DESC';
 
 // Create instance to access methods
 $plugin_instance = new WP_AltText_Updater();
@@ -70,14 +71,14 @@ $total_pages = ceil($total_items / $per_page);
             <thead>
                 <tr>
                     <th scope="col" class="column-thumbnail"><?php _e('Thumbnail', 'alt-text-auditor'); ?></th>
-                    <th scope="col" class="column-filename sortable <?php echo ($orderby === 'title') ? 'sorted' : ''; ?> <?php echo ($orderby === 'title') ? strtolower($order) : 'desc'; ?>">
+                    <th scope="col" class="column-filename sortable <?php echo ($orderby === 'title') ? 'sorted' : ''; ?> <?php echo esc_attr(($orderby === 'title') ? strtolower($order) : 'desc'); ?>">
                         <a href="<?php echo esc_url(add_query_arg(array('orderby' => 'title', 'order' => ($orderby === 'title' && $order === 'ASC') ? 'DESC' : 'ASC'))); ?>">
                             <span><?php _e('File Name', 'alt-text-auditor'); ?></span>
                             <span class="sorting-indicator"></span>
                         </a>
                     </th>
                     <th scope="col" class="column-alttext"><?php _e('Alt Text', 'alt-text-auditor'); ?></th>
-                    <th scope="col" class="column-status sortable <?php echo ($orderby === 'alt_status') ? 'sorted' : ''; ?> <?php echo ($orderby === 'alt_status') ? strtolower($order) : 'desc'; ?>">
+                    <th scope="col" class="column-status sortable <?php echo ($orderby === 'alt_status') ? 'sorted' : ''; ?> <?php echo esc_attr(($orderby === 'alt_status') ? strtolower($order) : 'desc'); ?>">
                         <a href="<?php echo esc_url(add_query_arg(array('orderby' => 'alt_status', 'order' => ($orderby === 'alt_status' && $order === 'ASC') ? 'DESC' : 'ASC'))); ?>">
                             <span><?php _e('Status', 'alt-text-auditor'); ?></span>
                             <span class="sorting-indicator"></span>

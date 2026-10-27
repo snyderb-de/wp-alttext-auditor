@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+- Allowlist manager sort direction and escape both sorting class attributes.
+- Require attachment and post edit permission before any alt-text or audit-record mutation.
+- Restrict site-wide scan cancellation to administrators.
+- Store report HTML privately in site-scoped, non-autoloaded options and require administrator permission and a nonce to view it.
+- Migrate legacy public reports, preserve their IDs, and update report links, retention, deletion, and uninstall cleanup.
+- Add focused security regression tests covering attacks, authorized workflows, migration failures, and report lifecycle behavior.
+
 ## 2.2.0 - 2026-02-13
 - Fixed scan report table dates not matching site timezone (#5).
 - Fixed dashboard statistics showing incorrect "last scan" times (#4).

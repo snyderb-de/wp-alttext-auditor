@@ -16,6 +16,26 @@ if (!defined('WP_UNINSTALL_PLUGIN')) {
 
 global $wpdb;
 
+// Remove private report content introduced by the protected report store.
+require_once __DIR__ . '/includes/class-html-report.php';
+$report_sites = is_multisite() ? get_sites(array('fields' => 'ids', 'number' => 0)) : array(get_current_blog_id());
+foreach ($report_sites as $report_site_id) {
+    if (is_multisite()) {
+        switch_to_blog($report_site_id);
+    }
+    $reports_deleted = WP_AltText_HTML_Report::delete_all_reports();
+    if ($reports_deleted) {
+        delete_option('alttext_audit_reports');
+        delete_option('alttext_audit_reports_private');
+    }
+    if (is_multisite()) {
+        restore_current_blog();
+    }
+    if (!$reports_deleted) {
+        wp_die(esc_html__('Alt Text Auditor could not delete its reports. Check database and uploads permissions before uninstalling.', 'alt-text-auditor'));
+    }
+}
+
 // Delete plugin options
 delete_option('alttext_audit_last_scan');
 delete_option('alttext_audit_cron_enabled');

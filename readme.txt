@@ -105,6 +105,12 @@ Yes! The plugin has full multisite support with network activation, per-site dat
 
 == Changelog ==
 
+= Unreleased =
+* Fixed manager sorting attribute injection and attachment edit authorization.
+* Restricted site-wide scan cancellation to administrators.
+* Moved report HTML to private database storage with administrator-only access.
+* Added legacy report migration and security regression tests. Visit each site's dashboard after updating; resolve any migration notice and purge cached copies of old public report URLs.
+
 = 2.2.0 =
 *Release Date: February 13th, 2026*
 

@@ -144,12 +144,11 @@ class WP_AltText_Scan_Manager {
         // Filter out scans to delete and delete associated reports
         $scans = array_filter($scans, function($scan) use ($scan_ids, &$deleted) {
             if (in_array($scan['id'], $scan_ids)) {
-                // Delete associated report file
+                // Delete associated report content.
                 if (!empty($scan['report_filename'])) {
-                    $upload_dir = wp_upload_dir();
-                    $report_file = trailingslashit($upload_dir['basedir']) . 'alttext-reports/' . $scan['report_filename'];
-                    if (file_exists($report_file)) {
-                        @unlink($report_file);
+                    require_once ALTTEXT_AUDITOR_PLUGIN_DIR . 'includes/class-html-report.php';
+                    if (!WP_AltText_HTML_Report::delete_report($scan['report_filename'])) {
+                        return true;
                     }
                 }
                 $deleted++;
@@ -195,8 +194,8 @@ class WP_AltText_Scan_Manager {
             return '';
         }
 
-        $upload_dir = wp_upload_dir();
-        return trailingslashit($upload_dir['baseurl']) . 'alttext-reports/' . $report_filename;
+        require_once ALTTEXT_AUDITOR_PLUGIN_DIR . 'includes/class-html-report.php';
+        return WP_AltText_HTML_Report::get_report_url($report_filename);
     }
 
     /**
@@ -206,21 +205,9 @@ class WP_AltText_Scan_Manager {
         $scans = $this->get_scans();
 
         if (count($scans) > 50) {
-            // Delete reports for scans being removed
-            $scans_to_remove = array_slice($scans, 50);
-            foreach ($scans_to_remove as $scan) {
-                if (!empty($scan['report_filename'])) {
-                    $upload_dir = wp_upload_dir();
-                    $report_file = trailingslashit($upload_dir['basedir']) . 'alttext-reports/' . $scan['report_filename'];
-                    if (file_exists($report_file)) {
-                        @unlink($report_file);
-                    }
-                }
-            }
-
-            // Keep only last 50
-            $scans = array_slice($scans, 0, 50);
-            update_option(self::SCANS_OPTION, $scans);
+            // Use the same deletion boundary so failed report deletions keep
+            // their scan references available for a later retry.
+            $this->delete_scans(array_column(array_slice($scans, 50), 'id'));
         }
     }
 
